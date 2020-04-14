@@ -21,6 +21,19 @@ __lua__
 -- * ask the player to draw it
 -- * stroke order matters
 -->8
+-- px   : x position
+-- py   : y position
+-- vx   : x velocity
+-- vy   : y velocity
+-- lx   : last x pos
+-- ly   : last y pos
+-- sz   : brush radius
+-- on   : using brush
+
+-- accl : speedup when moving
+-- drag : slowdown over time
+_accl=0.175
+_drag=0.1
 
 function _init()
 	cls()
@@ -29,18 +42,38 @@ function _init()
 	_brush_py=64
 	_brush_vx=0
 	_brush_vy=0
+	_brush_lx=64
+	_brush_ly=64
 	_brush_sz=0
 	_brush_on=false
-	_last_px=64
-	_last_py=64
 end
 
 function _update()
 	_brush_on=btn(❎)
-	if (btn(⬆️)) _brush_py-=1
-	if (btn(⬇️)) _brush_py+=1
-	if (btn(⬅️)) _brush_px-=1
-	if (btn(➡️)) _brush_px+=1
+	if (btn(⬆️)) _brush_vy-=_accl
+	if (btn(⬇️)) _brush_vy+=_accl
+	if (btn(⬅️)) _brush_vx-=_accl
+	if (btn(➡️)) _brush_vx+=_accl
+	if _brush_vx>0 then
+		_brush_vx-=_drag
+		_brush_vx=max(0,_brush_vx)
+	else
+		_brush_vx+=_drag
+		_brush_vx=min(0,_brush_vx)
+	end
+	if _brush_vy>0 then
+		_brush_vy-=_drag
+		_brush_vy=max(0,_brush_vy)
+	else
+		_brush_vy+=_drag
+		_brush_vy=min(0,_brush_vy)
+	end
+	if (_brush_vx~=0) then
+		_brush_px+=_brush_vx
+	end
+	if (_brush_vy~=0) then
+		_brush_py+=_brush_vy
+	end
 end
 
 function _draw()
