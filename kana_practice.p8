@@ -3,9 +3,11 @@ version 18
 __lua__
 -- kana practice
 -- by sestren
+-- github.com/sestren/
 
 -- based on shodo
 -- by ryosuke mihara
+-- github.com/oinariman/shodo
 
 -- description:
 -- * ink drying
@@ -19,17 +21,38 @@ __lua__
 -- * ask the player to draw it
 -- * stroke order matters
 -->8
+
 function _init()
-	
+	cls()
+	--memset(0x1000,0x11,128*64)
+	sspr(0,0,128,128,0,0)
+	_brush_px=64
+	_brush_py=64
+	_brush_vx=0
+	_brush_vy=0
+	_brush_sz=0
+	_last_px=64
+	_last_py=64
+	_brush_down=false
 end
 
 function _update()
-	
+	_brush_down=btn(❎)
+	if (btn(⬆️)) _brush_py-=1
+	if (btn(⬇️)) _brush_py+=1
+	if (btn(⬅️)) _brush_px-=1
+	if (btn(➡️)) _brush_px+=1
 end
 
 function _draw()
-	cls()
-	sspr(0,0,128,128,0,0)
+	--cls(2)
+	--sspr(0,0,128,128,0,0)
+	memcpy(0x6000,0x0000,0x2000)
+	if _brush_down then
+		circfill(_brush_px,_brush_py,2,1)
+	end
+	memcpy(0x0000,0x6000,0x2000)
+	circfill(_brush_px,_brush_py,1,7)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
