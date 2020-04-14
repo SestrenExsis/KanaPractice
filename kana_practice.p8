@@ -31,13 +31,13 @@ function _init()
 	_brush_vx=0
 	_brush_vy=0
 	_brush_sz=0
+	_brush_on=false
 	_last_px=64
 	_last_py=64
-	_brush_down=false
 end
 
 function _update()
-	_brush_down=btn(❎)
+	_brush_on=btn(❎)
 	if (btn(⬆️)) _brush_py-=1
 	if (btn(⬇️)) _brush_py+=1
 	if (btn(⬅️)) _brush_px-=1
@@ -48,7 +48,7 @@ function _draw()
 	--cls(2)
 	--sspr(0,0,128,128,0,0)
 	memcpy(0x6000,0x0000,0x2000)
-	if _brush_down then
+	if _brush_on then
 		circfill(_brush_px,_brush_py,2,1)
 	end
 	memcpy(0x0000,0x6000,0x2000)
