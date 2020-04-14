@@ -24,7 +24,6 @@ __lua__
 
 function _init()
 	cls()
-	--memset(0x1000,0x11,128*64)
 	sspr(0,0,128,128,0,0)
 	_brush_px=64
 	_brush_py=64
@@ -45,12 +44,13 @@ function _update()
 end
 
 function _draw()
-	--cls(2)
-	--sspr(0,0,128,128,0,0)
+	-- copy screen to paper
 	memcpy(0x6000,0x0000,0x2000)
+	-- use brush
 	if _brush_on then
 		circfill(_brush_px,_brush_py,2,1)
 	end
+	-- copy paper to screen
 	memcpy(0x0000,0x6000,0x2000)
 	circfill(_brush_px,_brush_py,1,7)
 end
