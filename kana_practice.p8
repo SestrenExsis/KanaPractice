@@ -3,7 +3,7 @@ version 18
 __lua__
 -- kana practice
 -- by sestren
--- github.com/sestren/
+-- github.com/sestrenexsis/kanapractice
 
 -- based on shodo
 -- by ryosuke mihara
@@ -46,6 +46,7 @@ function _init()
 	_brush_ly=64
 	_brush_sz=0
 	_brush_on=false
+	_ink={}
 end
 
 function _update()
@@ -74,17 +75,22 @@ function _update()
 	if (_brush_vy~=0) then
 		_brush_py+=_brush_vy
 	end
+	if _brush_on then
+		id=128*flr(_brush_py)
+		id+=flr(_brush_px)
+		if (_ink[id]==nil) _ink[id]=2
+		_ink[id]=max(_ink[id],2)
+	end
 end
 
 function _draw()
-	-- copy screen to paper
-	memcpy(0x6000,0x0000,0x2000)
-	-- use brush
-	if _brush_on then
-		circfill(_brush_px,_brush_py,2,1)
+	cls()
+	sspr(0,0,128,128,0,0)
+	for id,r in pairs(_ink) do
+		px=id%128
+		py=flr(id/128)%128
+		circfill(px,py,r,1)
 	end
-	-- copy paper to screen
-	memcpy(0x0000,0x6000,0x2000)
 	circfill(_brush_px,_brush_py,1,7)
 end
 __gfx__
