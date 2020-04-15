@@ -84,11 +84,29 @@ function _update()
 	if (_nib_vy~=0) then
 		_nib_py+=_nib_vy
 	end
+	local multi=1.000
+	if (_nib_on) multi=_pull
+	if (_nib_vx~=0) then
+		_nib_px+=multi*_nib_vx
+	end
+	if (_nib_vy~=0) then
+		_nib_py+=multi*_nib_vy
+	end
+	-- update ink effects
 	if _nib_on then
+		_nib_sz+=_pool
+	else
+		_nib_sz-=_pool
+	end
+	_nib_sz=mid(0,_nib_sz,_maxr)
+	if _nib_sz>0 then
 		id=128*flr(_nib_py)
 		id+=flr(_nib_px)
-		if (_ink[id]==nil) _ink[id]=2
-		_ink[id]=max(_ink[id],2)
+		if _ink[id]==nil then
+			_ink[id]=_nib_sz
+		elseif _ink[id]<_nib_sz then
+			_ink[id]=_nib_sz
+		end
 	end
 end
 
