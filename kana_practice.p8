@@ -59,10 +59,10 @@ function _init()
 	"n"
 	}
 	for k,v in pairs(list) do
-		if v~="  " then
+		if v~="  " and v~="sa" then
 			x=12*((k-1)%5)
 			y=12*(flr((k-1)/5))
-			drawkana(v,x,y)
+			drawkana2(v,x,y)
 		end
 	end
 	cls()
@@ -191,6 +191,68 @@ _kana["ro"]={132,133,134}
 _kana["wa"]={135,136,137,138}
 _kana["wo"]={139,140,141,142}
 _kana["n"]={143,144}
+
+function wait(frames)
+	for i=1,frames do
+		flip()
+	end
+end
+
+function drawkana2(kana,x,y)
+	local n={-1,0,1,0,0,-1,0,1,-1,-1,1,-1,-1,1,1,1}
+	local px=-1
+	local py=-1
+	-- scan through all frames
+	for id in all(_kana[kana]) do
+		-- find start of stroke
+		local found=false
+		local sx=8*(id%16)
+		local sy=8*flr(id/16)
+		for x=0,7 do
+			for y=0,7 do
+				if sget(sx+x,sy+y)==7 then
+					-- pause between strokes
+					if x!=px and y!=py then
+						wait(5)
+					end
+					px=x
+					py=y
+					found=true
+					break
+				end
+				if (found) break
+			end
+		 if (found) break
+		end
+		-- follow stroke path
+		local found=true
+		local dx=0
+		local dy=0
+		while found do
+			-- draw current pixel
+			pset(x+px,y+py,7)
+			flip()
+			found=false
+			-- find neighbors
+			for i=1,#n,2 do
+				local nx=px+n[i]
+				local ny=py+n[i+1]
+				if nx>=0 and nx<=7 and
+				   ny>=0 and ny<=7 and
+				   (n[i]!=dx or n[i+1]!=dy) then
+					if sget(sx+nx,sy+ny)==14 then
+						px=nx
+						py=ny
+						dx=-n[i]
+						dy=-n[i+1]
+						found=true
+						break
+					end
+				end
+			end -- for
+		end -- while
+	end -- for
+end -- function
 
 function drawkana(kana,x,y)
 	for id in all(_kana[kana]) do
