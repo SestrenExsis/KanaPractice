@@ -59,10 +59,18 @@ function _init()
 	"n"
 	}
 	for k,v in pairs(list) do
+		local s=strokes(v)
+		local i=0
 		if v~="  " then
 			x=12*((k-1)%5)
 			y=12*(flr((k-1)/5))
-			drawkana(v,x,y)
+			while (true) do
+				if drawkana(s,i,x,y) then
+					break
+				end
+				flip()
+				i+=1
+			end
 		end
 	end
 	cls()
@@ -192,13 +200,16 @@ _kana["wa"]={135,136,137,138}
 _kana["wo"]={139,140,141,142}
 _kana["n"]={143,144}
 
-function wait(frames)
-	for i=1,frames do
-		flip()
-	end
+function point(xpos,ypos)
+	local res={
+		x=xpos,
+		y=ypos
+	}
+	return res
 end
 
-function drawkana(kana,x,y)
+function strokes(kana)
+	local res={}
 	local n={
 		-- orthogonal
 		-1, 0, 1, 0, 0,-1, 0, 1,
@@ -209,6 +220,7 @@ function drawkana(kana,x,y)
 	local py=-1
 	-- scan through all frames
 	for id in all(_kana[kana]) do
+		local points={}
 		-- find start of stroke
 		local found=false
 		local sx=8*(id%16)
@@ -217,9 +229,6 @@ function drawkana(kana,x,y)
 			for y=0,7 do
 				if sget(sx+x,sy+y)==7 then
 					-- pause between strokes
-					if x!=px and y!=py then
-						wait(5)
-					end
 					px=x
 					py=y
 					found=true
@@ -236,9 +245,8 @@ function drawkana(kana,x,y)
 		local lx2=0
 		local ly2=0
 		while found do
-			-- draw current pixel
-			pset(x+px,y+py,7)
-			flip()
+			local pt=point(px,py)
+			add(points,pt)
 			found=false
 			-- find neighbors
 			for i=1,#n,2 do
@@ -261,8 +269,24 @@ function drawkana(kana,x,y)
 				end
 			end -- for each neighbor
 		end -- while neighbor found
+		add(res,points)
 	end -- for each stroke frame
-end -- drawkana()
+	return res
+end
+
+function drawkana(s,i,x,y)
+	for points in all(s) do
+		for pt in all(points) do
+			i-=1
+			if (i<=0) break
+			pset(x+pt.x,y+pt.y,7)
+		end
+		i-=5
+		if (i<=0) break
+	end
+	local res=(i>0)
+	return res
+end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
 0001eee0000e11100001111000011110070000100100007000000000000000000000000000000000000000000000000007eeee01011e1101011111010111110e
