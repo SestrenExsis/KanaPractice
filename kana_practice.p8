@@ -62,7 +62,7 @@ function _init()
 		if v~="  " then
 			x=12*((k-1)%5)
 			y=12*(flr((k-1)/5))
-			drawkana2(v,x,y)
+			drawkana(v,x,y)
 		end
 	end
 	cls()
@@ -198,8 +198,13 @@ function wait(frames)
 	end
 end
 
-function drawkana2(kana,x,y)
-	local n={-1,0,1,0,0,-1,0,1,-1,-1,1,-1,-1,1,1,1}
+function drawkana(kana,x,y)
+	local n={
+		-- orthogonal
+		-1, 0, 1, 0, 0,-1, 0, 1,
+		-- diagonal
+		-1,-1, 1,-1,-1, 1, 1, 1
+	}
 	local px=-1
 	local py=-1
 	-- scan through all frames
@@ -257,24 +262,7 @@ function drawkana2(kana,x,y)
 			end -- for each neighbor
 		end -- while neighbor found
 	end -- for each stroke frame
-end -- drawkana2()
-
-function drawkana(kana,x,y)
-	for id in all(_kana[kana]) do
-		local sx=8*(id%16)
-		local sy=8*flr(id/16)
-		for c in all({7,14}) do
-			for xx=sx,sx+7 do
-				for yy=sy,sy+7 do
-					if sget(xx,yy)==c then
-						pset(x+xx-sx,y+yy-sy,7)
-					end
-				end
-			end
-			flip()
-		end
-	end
-end
+end -- drawkana()
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
 0001eee0000e11100001111000011110070000100100007000000000000000000000000000000000000000000000000007eeee01011e1101011111010111110e
