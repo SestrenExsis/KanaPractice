@@ -58,14 +58,15 @@ function _init()
 	"wa","  ","  ","  ","wo",
 	"n"
 	}
+	local s=2 -- scale
 	for k,v in pairs(list) do
-		local s=strokes(v)
+		local p=strokes(v)
 		local i=0
 		if v~="  " then
-			x=12*((k-1)%5)
-			y=12*(flr((k-1)/5))
+			x=(1.5*s*8)*((k-1)%5)
+			y=(1.5*s*8)*(flr((k-1)/5))
 			while (true) do
-				if drawkana(s,i,x,y) then
+				if drawkana(p,i,x,y,s) then
 					break
 				end
 				flip()
@@ -282,12 +283,25 @@ function strokes(kana)
 	return res
 end
 
-function drawkana(s,i,x,y)
-	for points in all(s) do
+function drawkana(
+	p,   -- points table
+	i,   -- progression counter
+	x,y, -- upper left corner
+	s    -- scale in pixels
+	) -- return type: bool
+	for points in all(p) do
 		for pt in all(points) do
 			i-=1
 			if (i<=0) break
-			pset(x+pt.x,y+pt.y,7)
+			if s==1 then
+				pset(x+pt.x,y+pt.y,7)
+			else
+				local top=y+s*pt.y
+				local lft=x+s*pt.x
+				local btm=top+s-1
+				local rgt=lft+s-1
+				rectfill(lft,top,rgt,btm,7)
+			end
 		end
 		i-=5
 		if (i<=0) break
