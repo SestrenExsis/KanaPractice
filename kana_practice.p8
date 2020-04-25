@@ -44,9 +44,56 @@ _pull=0.650
 _pool=0.200
 _maxr=3.000
 
-function _init()
-	cls()
-	list={"a","i","u","e","o",
+-- kana info
+_knfrm={}
+_knfrm["a"]={0,1,2,3}
+_knfrm["i"]={4,5}
+_knfrm["u"]={6,7}
+_knfrm["e"]={8,9,10,11}
+_knfrm["o"]={12,13,14,15}
+_knfrm["ka"]={16,17,18}
+_knfrm["ki"]={19,20,21,22}
+_knfrm["ku"]={23}
+_knfrm["ke"]={24,25,26}
+_knfrm["ko"]={27,28}
+_knfrm["sa"]={29,30,31}
+_knfrm["shi"]={32}
+_knfrm["su"]={33,34,35}
+_knfrm["se"]={36,37,38}
+_knfrm["so"]={39,40,41,42}
+_knfrm["ta"]={43,44,45,46}
+_knfrm["chi"]={47,48,49}
+_knfrm["tsu"]={50}
+_knfrm["te"]={51,52}
+_knfrm["to"]={53,54}
+_knfrm["na"]={55,56,57,58,59}
+_knfrm["ni"]={60,61,62}
+_knfrm["nu"]={63,64,65,66}
+_knfrm["ne"]={67,68,69,70,71}
+_knfrm["no"]={72,73}
+_knfrm["ha"]={74,75,76,77}
+_knfrm["hi"]={78,79,80}
+_knfrm["fu"]={81,82,83,84}
+_knfrm["he"]={85}
+_knfrm["ho"]={86,87,88,89,90}
+_knfrm["ma"]={91,92,93,94}
+_knfrm["mi"]={95,96,97,98}
+_knfrm["mu"]={99,100,101,102}
+_knfrm["me"]={103,104,105}
+_knfrm["mo"]={106,107,108}
+_knfrm["ya"]={109,110,111}
+_knfrm["yu"]={112,113,114}
+_knfrm["yo"]={115,116,117}
+_knfrm["ra"]={118,119,120}
+_knfrm["ri"]={121,122}
+_knfrm["ru"]={123,124,125,126}
+_knfrm["re"]={127,128,129,130,131}
+_knfrm["ro"]={132,133,134}
+_knfrm["wa"]={135,136,137,138}
+_knfrm["wo"]={139,140,141,142}
+_knfrm["n"]={143,144}
+_knnam={
+ "a","i","u","e","o",
 	"ka","ki","ku","ke","ko",
 	"sa","shi","su","se","so",
 	"ta","chi","tsu","te","to",
@@ -57,25 +104,9 @@ function _init()
 	"ra","ri","ru","re","ro",
 	"wa","  ","  ","  ","wo",
 	"n"
-	}
-	local s=2 -- scale
-	for k,v in pairs(list) do
-		local p=strokes(v)
-		local i=0
-		if v~="  " then
-			x=(1.5*s*8)*((k-1)%5)
-			y=(1.5*s*8)*(flr((k-1)/5))
-			while (true) do
-				if drawkana(p,i,x,y,s) then
-					break
-				end
-				flip()
-				i+=1
-			end
-		end
-	end
-	cls()
-	--sspr(0,0,128,128,0,0)
+}
+
+function _init()
 	_nib_px=64
 	_nib_py=64
 	_nib_vx=0
@@ -84,6 +115,7 @@ function _init()
 	_nib_ly=64
 	_nib_sz=0
 	_nib_on=false
+	_kana="re"
 	_ink={}
 end
 
@@ -143,63 +175,17 @@ end
 
 function _draw()
 	cls()
-	--sspr(0,0,128,128,0,0)
+	local p=strokes(_kana)
+	drawkana(p,64,0,0,16)
 	for id,r in pairs(_ink) do
 		px=id%128
 		py=flr(id/128)%128
-		circfill(px,py,r,1)
+		circfill(px,py,r,5)
 	end
 	circfill(_nib_px,_nib_py,1,7)
 end
 -->8
--- draw kana
-_kana={}
-_kana["a"]={0,1,2,3}
-_kana["i"]={4,5}
-_kana["u"]={6,7}
-_kana["e"]={8,9,10,11}
-_kana["o"]={12,13,14,15}
-_kana["ka"]={16,17,18}
-_kana["ki"]={19,20,21,22}
-_kana["ku"]={23}
-_kana["ke"]={24,25,26}
-_kana["ko"]={27,28}
-_kana["sa"]={29,30,31}
-_kana["shi"]={32}
-_kana["su"]={33,34,35}
-_kana["se"]={36,37,38}
-_kana["so"]={39,40,41,42}
-_kana["ta"]={43,44,45,46}
-_kana["chi"]={47,48,49}
-_kana["tsu"]={50}
-_kana["te"]={51,52}
-_kana["to"]={53,54}
-_kana["na"]={55,56,57,58,59}
-_kana["ni"]={60,61,62}
-_kana["nu"]={63,64,65,66}
-_kana["ne"]={67,68,69,70,71}
-_kana["no"]={72,73}
-_kana["ha"]={74,75,76,77}
-_kana["hi"]={78,79,80}
-_kana["fu"]={81,82,83,84}
-_kana["he"]={85}
-_kana["ho"]={86,87,88,89,90}
-_kana["ma"]={91,92,93,94}
-_kana["mi"]={95,96,97,98}
-_kana["mu"]={99,100,101,102}
-_kana["me"]={103,104,105}
-_kana["mo"]={106,107,108}
-_kana["ya"]={109,110,111}
-_kana["yu"]={112,113,114}
-_kana["yo"]={115,116,117}
-_kana["ra"]={118,119,120}
-_kana["ri"]={121,122}
-_kana["ru"]={123,124,125,126}
-_kana["re"]={127,128,129,130,131}
-_kana["ro"]={132,133,134}
-_kana["wa"]={135,136,137,138}
-_kana["wo"]={139,140,141,142}
-_kana["n"]={143,144}
+--
 
 function point(xpos,ypos)
 	local res={
@@ -221,7 +207,7 @@ function strokes(kana)
 	local py=-1
 	-- scan through all frames
 	local points={}
-	for id in all(_kana[kana]) do
+	for id in all(_knfrm[kana]) do
 		-- find start of stroke
 		local found=false
 		local sx=8*(id%16)
@@ -294,13 +280,13 @@ function drawkana(
 			i-=1
 			if (i<=0) break
 			if s==1 then
-				pset(x+pt.x,y+pt.y,7)
+				pset(x+pt.x,y+pt.y,1)
 			else
 				local top=y+s*pt.y
 				local lft=x+s*pt.x
 				local btm=top+s-1
 				local rgt=lft+s-1
-				rectfill(lft,top,rgt,btm,7)
+				rectfill(lft,top,rgt,btm,1)
 			end
 		end
 		i-=5
@@ -308,6 +294,28 @@ function drawkana(
 	end
 	local res=(i>0)
 	return res
+end
+-->8
+-- other functions
+
+function drawallkana()
+	cls()
+	local s=1 -- scale
+	for k,v in pairs(_knnam) do
+		local p=strokes(v)
+		local i=0
+		if v~="  " then
+			x=(1.5*s*8)*((k-1)%5)
+			y=(1.5*s*8)*(flr((k-1)/5))
+			while (true) do
+				if drawkana(p,i,x,y,s) then
+					break
+				end
+				flip()
+				i+=1
+			end
+		end
+	end
 end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
