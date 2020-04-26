@@ -110,6 +110,8 @@ _knnam={
 }
 
 function _init()
+	palt(0,false)
+	palt(7,true)
 	_nib_px=64 -- nib x position
 	_nib_py=64 -- nib y position
 	_nib_vx=0  -- nib x velocity
@@ -196,17 +198,25 @@ function _update()
 	end
 end
 
+_c_cnv=7 -- canvas color
+_c_cut=7*16+6 -- watermark color
+_c_nib=1 -- nib color
+_c_wet=0 -- wet ink color
+_c_dry=5 -- dry ink color
+
 function _draw()
-	cls()
+	cls(_c_cnv)
 	local p=strokes(_kana)
+ fillp(0b0101111101011111)
 	drawkana(p,64,0,0,16)
+ fillp()
 	for id,r in pairs(_ink) do
 		px=id%128
 		py=flr(id/128)%128
-		circfill(px,py,r,5)
+		circfill(px,py,r,_c_wet)
 	end
-	circfill(_nib_px,_nib_py,1,7)
-	print(stat(32).." "..stat(33))
+	circfill(_nib_px,_nib_py,
+	 max(1,_nib_sz),_c_nib)
 end
 -->8
 -- kana functions
@@ -310,7 +320,10 @@ function drawkana(
 				local lft=x+s*pt.x
 				local btm=top+s-1
 				local rgt=lft+s-1
-				rectfill(lft,top,rgt,btm,1)
+				rectfill(
+					lft,top,rgt,btm,
+				 _c_cut
+				)
 			end
 		end
 		i-=5
