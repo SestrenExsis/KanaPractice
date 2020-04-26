@@ -110,32 +110,41 @@ _knnam={
 }
 
 function _init()
-	_nib_px=64
-	_nib_py=64
-	_nib_vx=0
-	_nib_vy=0
-	_nib_lx=64
-	_nib_ly=64
-	_nib_sz=0
+	_nib_px=64 -- nib x position
+	_nib_py=64 -- nib y position
+	_nib_vx=0  -- nib x velocity
+	_nib_vy=0  -- nib y velocity
+	_nib_lx=64 -- last nib x pos
+	_nib_ly=64 -- last nib y pos
+	_nib_sz=0  -- nib radius
 	_nib_on=false
 	_kana="re"
 	_ink={}
 end
 
 function _update()
+	_nib_lx=_nib_px
+	_nib_ly=_nib_py
  -- get input
-	_nib_on=btn(❎)
-	if (btn(⬆️)) _nib_vy-=_accl
-	if (btn(⬇️)) _nib_vy+=_accl
-	if (btn(⬅️)) _nib_vx-=_accl
-	if (btn(➡️)) _nib_vx+=_accl
-	-- mouse
  if btnp(🅾️,1) then
  	_mous=not _mous
  	sfx(0)
  end
 	if _mous then
 		poke(0x5f2d,1)
+		_nib_on=btn(❎) or stat(34)==1
+		_nib_px=stat(32)
+		_nib_py=stat(33)
+		_nib_lx=_nib_px
+		_nib_ly=_nib_py
+		_nib_vx=_nib_px-_nib_lx
+		_nib_vy=_nib_py-_nib_ly
+	else
+		_nib_on=btn(❎)
+		if (btn(⬆️)) _nib_vy-=_accl
+		if (btn(⬇️)) _nib_vy+=_accl
+		if (btn(⬅️)) _nib_vx-=_accl
+		if (btn(➡️)) _nib_vx+=_accl
 	end
 	-- update pen physics
 	if _nib_vx>0 then
@@ -166,6 +175,9 @@ function _update()
 	if (_nib_vy~=0) then
 		_nib_py+=multi*_nib_vy
 	end
+	-- keep brush in bounds
+	_nib_px=mid(0,_nib_px,127)
+	_nib_py=mid(0,_nib_py,127)
 	-- update ink effects
 	if _nib_on then
 		_nib_sz+=_pool
