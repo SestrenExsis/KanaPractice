@@ -45,6 +45,7 @@ _drag=0.100
 _pull=0.650
 _pool=0.200
 _maxr=3.000
+_maxw=60
 _mous=false
 
 -- kana info
@@ -109,6 +110,14 @@ _knnam={
 	"n"
 }
 
+function inkdrop(amount)
+	local res={
+		amt=amount,
+		wet=_maxw
+	}
+	return res
+end
+
 function _init()
 	palt(0,false)
 	palt(7,true)
@@ -121,7 +130,7 @@ function _init()
 	_nib_sz=0  -- nib radius
 	_nib_on=false
 	_kana="re"
-	_ink={}
+	_inks={}
 end
 
 function _update()
@@ -190,10 +199,13 @@ function _update()
 	if _nib_sz>0 then
 		id=128*flr(_nib_py)
 		id+=flr(_nib_px)
-		if _ink[id]==nil then
-			_ink[id]=_nib_sz
-		elseif _ink[id]<_nib_sz then
-			_ink[id]=_nib_sz
+		if _inks[id]==nil then
+		 local ink=inkdrop(_nib_sz)
+			_inks[id]=ink
+		else
+			local ink=_inks[id]
+			ink.amt=max(ink.amt,_nib_sz)
+			ink.wet=_maxw
 		end
 	end
 end
@@ -210,10 +222,16 @@ function _draw()
  fillp(0b0101111101011111)
 	drawkana(p,64,0,0,16)
  fillp()
-	for id,r in pairs(_ink) do
+	for id,ink in pairs(_inks) do
 		px=id%128
 		py=flr(id/128)%128
-		circfill(px,py,r,_c_wet)
+		local c=_c_wet
+		if ink.wet>0 then
+			ink.wet-=1
+		else
+			c=_c_dry
+		end
+		circfill(px,py,ink.amt,c)
 	end
 	circfill(_nib_px,_nib_py,
 	 max(1,_nib_sz),_c_nib)
