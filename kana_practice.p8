@@ -45,7 +45,7 @@ _drag=0.100
 _pull=0.650
 _pool=0.200
 _maxr=3.000
-_maxw=60
+_maxw=120
 _mous=false
 
 -- kana info
@@ -216,6 +216,13 @@ _c_cut=7*16+6 -- watermark color
 _c_nib=1 -- nib color
 _c_wet=0 -- wet ink color
 _c_dry=5 -- dry ink color
+_c_ink=_c_wet*16+_c_dry
+_fills={
+	0b0000101000001010,
+	0b0101101001011010,
+	0b0101111101011111,
+	0b1111111111111111
+}
 
 function _draw()
 	cls(_c_cnv)
@@ -230,23 +237,32 @@ function _draw()
 		circfill(px,py,amt,_c_dry)
 	end
 	-- draw wet ink
-	for id,ink in pairs(_wets) do
-		local amt=ink.amt
-		px=id%128
-		py=flr(id/128)%128
-		-- turn wet ink dry
-		if ink.wet>0 then
-			ink.wet-=1
-			circfill(px,py,amt,_c_wet)
-		else
-			if _drys[id]==nil then
-				_drys[id]=amt
-			else
-				amt=max(amt,_drys[id])
-				_drys[id]=amt
+	for f,fill in pairs(_fills) do
+		fillp(fill)
+		for id,ink in pairs(_wets) do
+			local w=ink.wet/_maxw
+			local g=ceil(w*#_fills)
+			if f==g then
+				local amt=ink.amt
+				px=id%128
+				py=flr(id/128)%128
+				circfill(px,py,amt,_c_ink)
+				-- turn wet ink dry
+				if ink.wet>1 then
+					ink.wet-=1
+				else
+					_wets[id]=nil
+					if _drys[id]==nil then
+						_drys[id]=amt
+					else
+						amt=max(amt,_drys[id])
+						_drys[id]=amt
+					end
+				end
 			end
 		end
 	end
+	fillp()
 	circfill(
 		_nib_px,_nib_py,
 	 max(1,_nib_sz),_c_nib
