@@ -130,7 +130,8 @@ function _init()
 	_nib_sz=0  -- nib radius
 	_nib_on=false
 	_kana="re"
-	_inks={}
+	_wets={}
+	_drys={}
 end
 
 function _update()
@@ -199,11 +200,11 @@ function _update()
 	if _nib_sz>0 then
 		id=128*flr(_nib_py)
 		id+=flr(_nib_px)
-		if _inks[id]==nil then
+		if _wets[id]==nil then
 		 local ink=inkdrop(_nib_sz)
-			_inks[id]=ink
+			_wets[id]=ink
 		else
-			local ink=_inks[id]
+			local ink=_wets[id]
 			ink.amt=max(ink.amt,_nib_sz)
 			ink.wet=_maxw
 		end
@@ -222,19 +223,34 @@ function _draw()
  fillp(0b0101111101011111)
 	drawkana(p,64,0,0,16)
  fillp()
-	for id,ink in pairs(_inks) do
+ -- draw dry ink
+	for id,amt in pairs(_drys) do
 		px=id%128
 		py=flr(id/128)%128
-		local c=_c_wet
+		circfill(px,py,amt,_c_dry)
+	end
+	-- draw wet ink
+	for id,ink in pairs(_wets) do
+		local amt=ink.amt
+		px=id%128
+		py=flr(id/128)%128
+		-- turn wet ink dry
 		if ink.wet>0 then
 			ink.wet-=1
+			circfill(px,py,amt,_c_wet)
 		else
-			c=_c_dry
+			if _drys[id]==nil then
+				_drys[id]=amt
+			else
+				amt=max(amt,_drys[id])
+				_drys[id]=amt
+			end
 		end
-		circfill(px,py,ink.amt,c)
 	end
-	circfill(_nib_px,_nib_py,
-	 max(1,_nib_sz),_c_nib)
+	circfill(
+		_nib_px,_nib_py,
+	 max(1,_nib_sz),_c_nib
+	)
 end
 -->8
 -- kana functions
