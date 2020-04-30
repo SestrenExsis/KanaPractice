@@ -39,13 +39,16 @@ __lua__
 -- pull : slowdown on paper
 -- pool : ink spread over time
 -- maxr : ink max spread
+-- maxw : max wetness of ink
+-- dryt : time to finish drying
 
 _accl=0.175
 _drag=0.100
 _pull=0.650
 _pool=0.200
 _maxr=3.000
-_maxw=120
+_maxw=120   
+_dryt=18
 _mous=false
 
 -- kana info
@@ -240,8 +243,11 @@ function _draw()
 	for f,fill in pairs(_fills) do
 		fillp(fill)
 		for id,ink in pairs(_wets) do
-			local w=ink.wet/_maxw
-			local g=ceil(w*#_fills)
+			local g=#_fills
+			if (ink.wet<=_dryt) then
+				local w=ink.wet/_dryt
+				g=ceil(w*#_fills)
+			end
 			if f==g then
 				local amt=ink.amt
 				px=id%128
