@@ -119,14 +119,6 @@ _fills={
 -->8
 -- main functions
 
-function inkdrop(amount)
-	local res={
-		amt=amount,
-		wet=_maxw
-	}
-	return res
-end
-
 -- px   : x position
 -- py   : y position
 -- vx   : x velocity
@@ -165,8 +157,6 @@ function _update()
 		_nib_on=btn(❎) or stat(34)==1
 		_nib_px=stat(32)
 		_nib_py=stat(33)
-		_nib_lx=_nib_px
-		_nib_ly=_nib_py
 		_nib_vx=_nib_px-_nib_lx
 		_nib_vy=_nib_py-_nib_ly
 	else
@@ -191,19 +181,15 @@ function _update()
 		_nib_vy+=_drag
 		_nib_vy=min(0,_nib_vy)
 	end
-	if (_nib_vx~=0) then
-		_nib_px+=_nib_vx
-	end
-	if (_nib_vy~=0) then
-		_nib_py+=_nib_vy
-	end
-	local multi=1.000
-	if (_nib_on) multi=_pull
-	if (_nib_vx~=0) then
-		_nib_px+=multi*_nib_vx
-	end
-	if (_nib_vy~=0) then
-		_nib_py+=multi*_nib_vy
+	if (not _mous) then
+		local multi=1.000
+		if (_nib_on) multi=_pull
+		if (_nib_vx~=0) then
+			_nib_px+=multi*_nib_vx
+		end
+		if (_nib_vy~=0) then
+			_nib_py+=multi*_nib_vy
+		end
 	end
 	-- keep brush in bounds
 	_nib_px=mid(0,_nib_px,127)
@@ -275,15 +261,74 @@ function _draw()
 		_nib_px,_nib_py,
 	 max(1,_nib_sz),_c_nib
 	)
+	local l=point(_nib_lx,_nib_ly)
+	local p=point(_nib_px,_nib_py)
+	local pts=betweens(l,p)
+	for pt in all(pts) do
+		pset(pt.x,pt.y,8)
+	end
 end
 -->8
--- kana functions
+-- helper functions
+
+function inkdrop(amount)
+	local res={
+		amt=amount,
+		wet=_maxw
+	}
+	return res
+end
 
 function point(xpos,ypos)
 	local res={
 		x=xpos,
 		y=ypos
 	}
+	return res
+end
+
+function betweens(pt0,pt1)
+	local x0=flr(pt0.x)
+	local y0=flr(pt0.y)
+	local x1=flr(pt1.x)
+	local y1=flr(pt1.y)
+	local w=abs(x1-x0)
+	local h=abs(y1-y0)
+	local dx=0
+	if w>0 then
+		dx=(x1-x0)/w
+	end
+	local dy=0
+	if h>0 then
+		dy=(y1-y0)/h
+	end
+	local e=max(w,h)
+	local dw=2*w
+	local dh=2*h
+	local x=x0
+	local y=y0
+	local res={}
+	if w>=h then
+		while x!=x1 do
+			x+=dx
+			e+=dh
+			if e>=dw then
+				e-=dw
+				y+=dy
+			end
+			add(res,point(x,y))
+		end
+	else
+		while y!=y1 do
+			y+=dy
+			e+=dw
+			if e>=dh then
+				e-=dh
+				x+=dx
+			end
+			add(res,point(x,y))
+		end
+	end
 	return res
 end
 
