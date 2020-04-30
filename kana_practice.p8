@@ -6,10 +6,10 @@ __lua__
 -- github.com/sestrenexsis/kanapractice
 
 -- code based on shodo
--- by ryosuke mihara
--- github.com/oinariman/shodo
+--  by ryosuke mihara
+--  github.com/oinariman/shodo
 -- pixel art based on art by hiro (hamstone)
--- assetstore.unity.com/packages/2d/fonts/sprite-font-japanese-kana-43862
+--  assetstore.unity.com/packages/2d/fonts/sprite-font-japanese-kana-43862
 
 -- description:
 -- * ink drying
@@ -23,16 +23,7 @@ __lua__
 -- * ask the player to draw it
 -- * stroke order matters
 -->8
--- main functions
-
--- px   : x position
--- py   : y position
--- vx   : x velocity
--- vy   : y velocity
--- lx   : last x pos
--- ly   : last y pos
--- sz   : brush radius
--- on   : using brush
+-- constants
 
 -- accl : speedup when moving
 -- drag : slowdown over time
@@ -113,6 +104,21 @@ _knnam={
 	"n"
 }
 
+_c_cnv=7 -- canvas color
+_c_cut=7*16+6 -- watermark color
+_c_nib=1 -- nib color
+_c_wet=0 -- wet ink color
+_c_dry=5 -- dry ink color
+_c_ink=_c_wet*16+_c_dry
+_fills={
+	0b0000101000001010,
+	0b0101101001011010,
+	0b0101111101011111,
+	0b1111111111111111
+}
+-->8
+-- main functions
+
 function inkdrop(amount)
 	local res={
 		amt=amount,
@@ -120,6 +126,15 @@ function inkdrop(amount)
 	}
 	return res
 end
+
+-- px   : x position
+-- py   : y position
+-- vx   : x velocity
+-- vy   : y velocity
+-- lx   : last x pos
+-- ly   : last y pos
+-- sz   : brush radius
+-- on   : using brush
 
 function _init()
 	palt(0,false)
@@ -213,19 +228,6 @@ function _update()
 		end
 	end
 end
-
-_c_cnv=7 -- canvas color
-_c_cut=7*16+6 -- watermark color
-_c_nib=1 -- nib color
-_c_wet=0 -- wet ink color
-_c_dry=5 -- dry ink color
-_c_ink=_c_wet*16+_c_dry
-_fills={
-	0b0000101000001010,
-	0b0101101001011010,
-	0b0101111101011111,
-	0b1111111111111111
-}
 
 function _draw()
 	cls(_c_cnv)
