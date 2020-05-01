@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 -- kana practice
--- by sestren
+-- by sestrenexsis
 -- github.com/sestrenexsis/kanapractice
 
 -- code based on shodo
@@ -139,7 +139,15 @@ function _init()
 	_nib_ly=64 -- last nib y pos
 	_nib_sz=0  -- nib radius
 	_nib_on=false
-	_kana="re"
+	newpage()
+end
+
+function newpage(kana)
+	if kana==nil then
+		local i=flr(rnd(#_knnam))+1
+		kana=_knnam[i]
+	end
+	_kana=kana
 	_wets={}
 	_drys={}
 end
@@ -166,6 +174,7 @@ function _update()
 		if (btn(⬅️)) _nib_vx-=_accl
 		if (btn(➡️)) _nib_vx+=_accl
 	end
+	if (btnp(🅾️)) newpage()
 	-- update pen physics
 	if _nib_vx>0 then
 		_nib_vx-=_drag
@@ -191,7 +200,7 @@ function _update()
 			_nib_py+=multi*_nib_vy
 		end
 	end
-	-- keep brush in bounds
+	-- keep pen in bounds
 	_nib_px=mid(0,_nib_px,127)
 	_nib_py=mid(0,_nib_py,127)
 	-- update ink effects
@@ -268,6 +277,7 @@ function _draw()
 		_nib_px,_nib_py,
 	 max(1,_nib_sz),_c_nib
 	)
+	print(_kana,2,2,1)
 end
 -->8
 -- helper functions
