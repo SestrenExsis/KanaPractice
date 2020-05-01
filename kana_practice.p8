@@ -201,16 +201,23 @@ function _update()
 		_nib_sz-=_pool
 	end
 	_nib_sz=mid(0,_nib_sz,_maxr)
+	local l=point(_nib_lx,_nib_ly)
+	local p=point(_nib_px,_nib_py)
+	local pts=betweens(l,p)
 	if _nib_sz>0 then
-		id=128*flr(_nib_py)
-		id+=flr(_nib_px)
-		if _wets[id]==nil then
-		 local ink=inkdrop(_nib_sz)
-			_wets[id]=ink
-		else
-			local ink=_wets[id]
-			ink.amt=max(ink.amt,_nib_sz)
-			ink.wet=_maxw
+		for pt in all(pts) do
+			id=128*flr(pt.y)
+			id+=flr(pt.x)
+			if _wets[id]==nil then
+			 local ink=inkdrop(_nib_sz)
+				_wets[id]=ink
+			else
+				local ink=_wets[id]
+				ink.amt=_nib_sz
+				-- _nib_sz looks better
+				-- than max(ink.amt,_nib_sz)
+				ink.wet=_maxw
+			end
 		end
 	end
 end
@@ -261,12 +268,6 @@ function _draw()
 		_nib_px,_nib_py,
 	 max(1,_nib_sz),_c_nib
 	)
-	local l=point(_nib_lx,_nib_ly)
-	local p=point(_nib_px,_nib_py)
-	local pts=betweens(l,p)
-	for pt in all(pts) do
-		pset(pt.x,pt.y,8)
-	end
 end
 -->8
 -- helper functions
