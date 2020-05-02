@@ -234,8 +234,12 @@ end
 function _draw()
 	cls(_c_cnv)
 	local p=strokes(_kana)
+	drawkana(p,64,7,9,2,_c_cut)
+	local i=(12*t())%64
+	i=mid(0,i-16,64)
+	drawkana(p,i,7,9,2,_c_dry)
  fillp(0b0101111101011111)
-	drawkana(p,64,0,0,16)
+	drawkana(p,64,24,24,12)
  fillp()
  -- draw dry ink
 	for id,amt in pairs(_drys) do
@@ -277,7 +281,7 @@ function _draw()
 		_nib_px,_nib_py,
 	 max(1,_nib_sz),_c_nib
 	)
-	print(_kana,2,2,1)
+	print(_kana,3,3,1)
 end
 -->8
 -- helper functions
@@ -421,23 +425,22 @@ function drawkana(
 	p,   -- points table
 	i,   -- progression counter
 	x,y, -- upper left corner
-	s    -- scale in pixels
+	s,   -- scale in pixels
+	c    -- color
 	) -- return type: bool
+	if (c==nil) c=_c_cut
 	for points in all(p) do
 		for pt in all(points) do
 			i-=1
 			if (i<=0) break
 			if s==1 then
-				pset(x+pt.x,y+pt.y,1)
+				pset(x+pt.x,y+pt.y,c)
 			else
 				local top=y+s*pt.y
 				local lft=x+s*pt.x
 				local btm=top+s-1
 				local rgt=lft+s-1
-				rectfill(
-					lft,top,rgt,btm,
-				 _c_cut
-				)
+				rectfill(lft,top,rgt,btm,c)
 			end
 		end
 		i-=5
