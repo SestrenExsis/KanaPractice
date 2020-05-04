@@ -37,9 +37,8 @@ _accl=0.175
 _drag=0.100
 _pull=0.650
 _pool=0.200
-_maxr=3.000
-_maxw=120   
-_dryt=18
+_maxr=5.000
+_dryt={3.4,0.2,0.2,0.2}
 _mous=false
 
 -- kana info
@@ -98,9 +97,9 @@ _knnam={
 	"na","ni","nu","ne","no",
 	"ha","hi","fu","he","ho",
 	"ma","mi","mu","me","mo",
-	"ya","  ","yu","  ","yo",
+	"ya","yu","yo",
 	"ra","ri","ru","re","ro",
-	"wa","  ","  ","  ","wo",
+	"wa","wo",
 	"n"
 }
 
@@ -111,10 +110,11 @@ _c_wet=0 -- wet ink color
 _c_dry=5 -- dry ink color
 _c_ink=_c_wet*16+_c_dry
 _fills={
-	0b0000101000001010,
-	0b0101101001011010,
+	0b1111111111111111,
 	0b0101111101011111,
-	0b1111111111111111
+	0b0101101001011010,
+	0b0000101000001010,
+	0b0000000000000000
 }
 -->8
 -- main functions
@@ -148,8 +148,7 @@ function newpage(kana)
 		kana=_knnam[i]
 	end
 	_kana=kana
-	_wets={}
-	_drys={}
+	_inks={}
 end
 
 function _update()
@@ -215,18 +214,8 @@ function _update()
 	local pts=betweens(l,p)
 	if _nib_sz>0 then
 		for pt in all(pts) do
-			id=128*flr(pt.y)
-			id+=flr(pt.x)
-			if _wets[id]==nil then
-			 local ink=inkdrop(_nib_sz)
-				_wets[id]=ink
-			else
-				local ink=_wets[id]
-				ink.amt=_nib_sz
-				-- _nib_sz looks better
-				-- than max(ink.amt,_nib_sz)
-				ink.wet=_maxw
-			end
+			local ink=inkdrop(pt,_nib_sz)
+			add(_inks,ink)
 		end
 	end
 end
@@ -241,41 +230,24 @@ function _draw()
  fillp(0b0101111101011111)
 	drawkana(p,64,24,24,12)
  fillp()
- -- draw dry ink
-	for id,amt in pairs(_drys) do
-		px=id%128
-		py=flr(id/128)%128
-		circfill(px,py,amt,_c_dry)
-	end
-	-- draw wet ink
-	for f,fill in pairs(_fills) do
-		fillp(fill)
-		for id,ink in pairs(_wets) do
-			local g=#_fills
-			if (ink.wet<=_dryt) then
-				local w=ink.wet/_dryt
-				g=ceil(w*#_fills)
-			end
-			if f==g then
-				local amt=ink.amt
-				px=id%128
-				py=flr(id/128)%128
-				circfill(px,py,amt,_c_ink)
-				-- turn wet ink dry
-				if ink.wet>1 then
-					ink.wet-=1
-				else
-					_wets[id]=nil
-					if _drys[id]==nil then
-						_drys[id]=amt
-					else
-						amt=max(amt,_drys[id])
-						_drys[id]=amt
-					end
-				end
-			end
-		end
-	end
+ -- draw ink
+ for ink in all(_inks) do
+ 	local age=t()-ink.age
+ 	local fill=_fills[#_fills]
+ 	for i=1,#_dryt do
+ 		age-=_dryt[i]
+ 		if age<0 then
+ 			fill=_fills[i]
+ 			break
+ 		end
+ 	end
+ 	fillp(fill)
+ 	local pos=ink.pos
+ 	circfill(
+ 		pos.x,pos.y,
+ 		ink.amt,_c_ink
+ 	)
+ end
 	fillp()
 	circfill(
 		_nib_px,_nib_py,
@@ -286,18 +258,22 @@ end
 -->8
 -- helper functions
 
-function inkdrop(amount)
-	local res={
-		amt=amount,
-		wet=_maxw
-	}
-	return res
-end
-
 function point(xpos,ypos)
 	local res={
 		x=xpos,
 		y=ypos
+	}
+	return res
+end
+
+function inkdrop(
+	position,
+	amount
+)
+	local res={
+		pos=position,
+		amt=amount,
+		age=t()
 	}
 	return res
 end
