@@ -138,17 +138,19 @@ function _init()
 	_nib_lx=64 -- last nib x pos
 	_nib_ly=64 -- last nib y pos
 	_nib_sz=0  -- nib radius
-	_nib_on=false
 	newpage()
 end
 
 function newpage(kana)
+	_nib_on=false
+	_nib_pr=false
+	_lines=0
 	if kana==nil then
 		local i=flr(rnd(#_knnam))+1
 		kana=_knnam[i]
 	end
 	_kana=kana
-	_inks={}
+	_inks={{}}
 end
 
 function _update()
@@ -161,17 +163,22 @@ function _update()
  end
 	if _mous then
 		poke(0x5f2d,1)
+		_nib_pr=_nib_on
 		_nib_on=btn(❎) or stat(34)==1
 		_nib_px=stat(32)
 		_nib_py=stat(33)
 		_nib_vx=_nib_px-_nib_lx
 		_nib_vy=_nib_py-_nib_ly
 	else
+		_nib_pr=_nib_on
 		_nib_on=btn(❎)
 		if (btn(⬆️)) _nib_vy-=_accl
 		if (btn(⬇️)) _nib_vy+=_accl
 		if (btn(⬅️)) _nib_vx-=_accl
 		if (btn(➡️)) _nib_vx+=_accl
+	end
+	if _nib_pr and _nib_on then
+		_nib_pr=false
 	end
 	if (btnp(🅾️)) newpage()
 	-- update pen physics
@@ -203,6 +210,7 @@ function _update()
 	_nib_px=mid(0,_nib_px,127)
 	_nib_py=mid(0,_nib_py,127)
 	-- update ink effects
+	if (_nib_pr) add(_inks,{})
 	if _nib_on then
 		_nib_sz+=_pool
 	else
@@ -215,7 +223,7 @@ function _update()
 	if _nib_sz>0 then
 		for pt in all(pts) do
 			local ink=inkdrop(pt,_nib_sz)
-			add(_inks,ink)
+			add(_inks[#_inks],ink)
 		end
 	end
 end
@@ -231,29 +239,35 @@ function _draw()
 	drawkana(p,64,24,24,12)
  fillp()
  -- draw ink
- for ink in all(_inks) do
- 	local age=t()-ink.age
- 	local fill=_fills[#_fills]
- 	for i=1,#_dryt do
- 		age-=_dryt[i]
- 		if age<0 then
- 			fill=_fills[i]
- 			break
+ for inks in all (_inks) do
+ 	for ink in all(inks) do
+ 		local age=t()-ink.age
+ 		local fill=_fills[#_fills]
+ 		for i=1,#_dryt do
+ 			age-=_dryt[i]
+ 			if age<0 then
+ 				fill=_fills[i]
+ 				break
+ 			end
  		end
+ 		fillp(fill)
+ 		local pos=ink.pos
+ 		circfill(
+ 			pos.x,pos.y,
+ 			ink.amt,_c_ink
+ 		)
  	end
- 	fillp(fill)
- 	local pos=ink.pos
- 	circfill(
- 		pos.x,pos.y,
- 		ink.amt,_c_ink
- 	)
- end
-	fillp()
-	circfill(
-		_nib_px,_nib_py,
-	 max(1,_nib_sz),_c_nib
-	)
+	end
+		fillp()
+		circfill(
+			_nib_px,_nib_py,
+	 	max(1,_nib_sz),_c_nib
+		)
 	print(_kana,3,3,1)
+	print(#_inks,112,0,1)
+	if #_inks>0 then
+		print(#_inks[1],112,8,1)
+	end
 end
 -->8
 -- helper functions
