@@ -264,10 +264,7 @@ function _draw()
 	 	max(1,_nib_sz),_c_nib
 		)
 	print(_kana,3,3,1)
-	print(#_inks,112,0,1)
-	if #_inks>0 then
-		print(#_inks[1],112,8,1)
-	end
+	print(#_inks-1,112,0,1)
 end
 -->8
 -- helper functions
