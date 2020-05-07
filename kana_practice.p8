@@ -157,6 +157,10 @@ function _update()
 	_nib_lx=_nib_px
 	_nib_ly=_nib_py
  -- get input
+	if btnp(🅾️) then
+		newpage()
+		return
+	end
  if btnp(🅾️,1) then
  	_mous=not _mous
  	sfx(0)
@@ -180,7 +184,6 @@ function _update()
 	if _nib_pr and _nib_on then
 		_nib_pr=false
 	end
-	if (btnp(🅾️)) newpage()
 	-- update pen physics
 	if _nib_vx>0 then
 		_nib_vx-=_drag
@@ -265,6 +268,8 @@ function _draw()
 		)
 	print(_kana,3,3,1)
 	print(#_inks-1,112,0,1)
+	local test=testinks(24,24,12)
+	drawkana(test,64,7,9,2,3)
 end
 -->8
 -- helper functions
@@ -434,6 +439,29 @@ function drawkana(
 		if (i<=0) break
 	end
 	local res=(i>0)
+	return res
+end
+
+function testinks(
+	x,y, -- upper left corner
+	s    -- scale in pixels
+	) -- return type: table
+	local res={}
+	for inks in all(_inks) do
+		local stroke={}
+		local lx=-1
+		local ly=-1
+		for ink in all(inks) do
+			local cx=flr((ink.pos.x-x)/s)
+			local cy=flr((ink.pos.y-y)/s)
+			if cx!=lx or cy!=ly then
+				add(stroke,point(cx,cy))
+			end
+			lx=cx
+			ly=cy
+		end
+		add(res,stroke)
+	end
 	return res
 end
 -->8
