@@ -269,7 +269,9 @@ function _draw()
 	print(_kana,3,3,1)
 	print(#_inks-1,112,0,1)
 	local test=testinks(24,24,12)
-	drawkana(test,64,7,9,2,3)
+	drawkana(test,64,23,9,2,3)
+	local acc=evalinks(test,p)
+	print(acc,112,8,1)
 end
 -->8
 -- helper functions
@@ -464,6 +466,35 @@ function testinks(
 	end
 	return res
 end
+
+function evalinks(src,trg)
+	local tot=0
+	local pts={}
+	for i=1,#trg do
+		for j=1,#trg[i] do
+			local pt=trg[i][j]
+			local index=8*pt.y+pt.x
+			pts[index]=1
+			tot+=1
+		end
+	end
+	local err=tot
+	for i=1,#src do
+		for j=1,#src[i] do
+			local pt=src[i][j]
+			local index=8*pt.y+pt.x
+			if pts[index]==nil then
+				err+=1
+			elseif pts[index]==1 then
+				err-=1
+				pts[index]=0
+			end
+		end
+	end
+	local res=max(0,(tot-err))/tot
+	return res
+end
+
 -->8
 -- other functions
 
