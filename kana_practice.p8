@@ -270,8 +270,12 @@ function _draw()
 	print(#_inks-1,112,0,1)
 	local test=testinks(24,24,12)
 	drawkana(test,64,23,9,2,3)
-	local acc=evalinks(test,p)
-	print(acc,112,8,1)
+	local evals=evaluateall(test,p)
+	for i=1,#evals do
+		local ev=evals[i]
+		local msg=ev[1].." "..ev[2]
+		print(msg,104,8*i,1)
+	end
 end
 -->8
 -- helper functions
@@ -467,31 +471,65 @@ function testinks(
 	return res
 end
 
-function evalinks(src,trg)
+function evaluate(src,trg)
 	local tot=0
 	local pts={}
 	for i=1,#trg do
-		for j=1,#trg[i] do
-			local pt=trg[i][j]
-			local index=8*pt.y+pt.x
-			pts[index]=1
-			tot+=1
-		end
+		local pt=trg[i]
+		local index=8*pt.y+pt.x
+		pts[index]=1
+		tot+=1
 	end
 	local err=tot
 	for i=1,#src do
-		for j=1,#src[i] do
-			local pt=src[i][j]
-			local index=8*pt.y+pt.x
-			if pts[index]==nil then
-				err+=1
-			elseif pts[index]==1 then
-				err-=1
-				pts[index]=0
-			end
+		local pt=src[i]
+		local index=8*pt.y+pt.x
+		if pts[index]==nil then
+			err+=1
+		elseif pts[index]==1 then
+			err-=1
+			pts[index]=0
 		end
 	end
-	local res=max(0,(tot-err))/tot
+	local res=err
+	return res
+end
+
+function evaluateall(src,trg)
+	local evals={}
+	local minst=min(#src,#trg)
+	local maxst=max(#src,#trg)
+	if 1<=minst then
+		for i=1,minst do
+			local tot=max(#src[i],#trg[i])
+			local err=evaluate(src[i],trg[i])
+			local eval={tot,err}
+			add(evals,eval)
+		end
+	end
+	if minst+1<=maxst then
+		for i=minst+1,maxst do
+			local tot=0
+			local err=0
+			if #src>=i then
+				tot=#src[i]
+				err=#src[i]
+			end
+			if #trg>=i then
+				tot=min(tot,#trg[i])
+				err=max(err,#trg[i])
+			end
+			local eval={tot,err}
+			add(evals,eval)
+		end
+	end
+	local tot=0
+	local err=0
+	for i=1,#evals do
+		tot+=evals[i][1]
+		err+=evals[i][2]
+	end
+	local res=evals
 	return res
 end
 
