@@ -40,6 +40,7 @@ _pool=0.200
 _maxr=5.000
 _dryt={3.4,0.2,0.2,0.2}
 _mous=false
+_hint=false
 
 -- kana info
 _knfrm={}
@@ -165,6 +166,10 @@ function _update()
  	_mous=not _mous
  	sfx(0)
  end
+ if btnp(❎,1) then
+ 	_hint=not _hint
+ 	sfx(0)
+ end
 	if _mous then
 		poke(0x5f2d,1)
 		_nib_pr=_nib_on
@@ -233,13 +238,17 @@ end
 
 function _draw()
 	cls(_c_cnv)
+	rect(23,23,120,120,6)
 	local p=strokes(_kana)
-	drawkana(p,64,7,9,2,_c_cut)
-	local i=(12*t())%64
-	i=mid(0,i-16,64)
-	drawkana(p,i,7,9,2,_c_dry)
- fillp(0b0101111101011111)
-	drawkana(p,64,24,24,12)
+	-- draw hint
+	if _hint then
+		drawkana(p,64,7,9,2,_c_cut)
+		local i=(12*t())%64
+		i=mid(0,i-16,64)
+		drawkana(p,i,7,9,2,_c_dry)
+ 	fillp(0b0101111101011111)
+		drawkana(p,64,24,24,12)
+	end
  fillp()
  -- draw ink
  for inks in all (_inks) do
@@ -268,14 +277,14 @@ function _draw()
 		)
 	print(_kana,3,3,1)
 	print(#_inks-1,112,0,1)
-	local test=testinks(24,24,12)
-	drawkana(test,64,23,9,2,3)
-	local evals=evaluateall(test,p)
-	for i=1,#evals do
-		local ev=evals[i]
-		local msg=ev[1].." "..ev[2]
-		print(msg,104,8*i,1)
-	end
+	--local test=testinks(24,24,12)
+	--drawkana(test,64,23,9,2,3)
+	--local evals=evaluateall(test,p)
+	--for i=1,#evals do
+	--	local ev=evals[i]
+	--	local msg=ev[1].." "..ev[2]
+	--	print(msg,104,8*i,1)
+	--end
 end
 -->8
 -- helper functions
