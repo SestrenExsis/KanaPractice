@@ -130,9 +130,13 @@ _fills={
 -- on   : using brush
 
 function _init()
-	initfn=initcard
-	updatefn=updatecard
-	drawfn=drawcard
+	initfn=initmenu
+	updatefn=updatemenu
+	drawfn=drawmenu
+	initfn()
+end
+
+function refresh()
 	initfn()
 end
 
@@ -144,7 +148,29 @@ function _draw()
 	drawfn()
 end
 
+function initmenu()
+	initfn=initmenu
+	updatefn=updatemenu
+	drawfn=drawmenu
+	palt(0,false)
+	palt(7,true)
+end
+
+function updatemenu()
+	if btnp(🅾️) then
+		initcard()
+	end
+end
+
+function drawmenu()
+	cls()
+	print("press 🅾️ to play")
+end
+
 function initcard()
+	initfn=initcard
+	updatefn=updatecard
+	drawfn=drawcard
 	palt(0,false)
 	palt(7,true)
 	_nib_px=64 -- nib x position
@@ -167,7 +193,7 @@ function updatecard()
 	_nib_ly=_nib_py
  -- get input
 	if btnp(🅾️) then
-		initfn()
+		refresh()
 		return
 	end
  if btnp(🅾️,1) then
