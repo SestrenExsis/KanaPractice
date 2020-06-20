@@ -120,23 +120,11 @@ _fills={
 -->8
 -- main functions
 
--- px   : x position
--- py   : y position
--- vx   : x velocity
--- vy   : y velocity
--- lx   : last x pos
--- ly   : last y pos
--- sz   : brush radius
--- on   : using brush
-
 function _init()
-	initfn=initmenu
-	updatefn=updatemenu
-	drawfn=drawmenu
-	initfn()
+	inittitle()
 end
 
-function refresh()
+function initscreen()
 	initfn()
 end
 
@@ -146,9 +134,39 @@ end
 
 function _draw()
 	drawfn()
+	print(_debug.screen,1,122,1)
 end
 
+-- title screen
+
+function inittitle()
+	_debug={
+		screen="title"
+	}
+	initfn=inittitle
+	updatefn=updatetitle
+	drawfn=drawtitle
+	palt(0,false)
+	palt(7,true)
+end
+
+function updatetitle()
+	if btnp(❎) then
+		initmenu()
+	end
+end
+
+function drawtitle()
+	cls()
+	print("press ❎ to go to menu")
+end
+
+-- menu screen
+
 function initmenu()
+	_debug={
+		screen="main menu"
+	}
 	initfn=initmenu
 	updatefn=updatemenu
 	drawfn=drawmenu
@@ -157,29 +175,43 @@ function initmenu()
 end
 
 function updatemenu()
-	if btnp(🅾️) then
+	if btnp(❎) then
 		initcard()
 	end
 end
 
 function drawmenu()
 	cls()
-	print("press 🅾️ to play")
+	print("press ❎ to practice writing")
 end
 
+-- card screen
+
+-- px : x position
+-- py : y position
+-- vx : x velocity
+-- vy : y velocity
+-- lx : last x pos
+-- ly : last y pos
+-- sz : brush radius
+-- on : using brush
+
 function initcard()
+	_debug={
+		screen="card"
+	}
 	initfn=initcard
 	updatefn=updatecard
 	drawfn=drawcard
 	palt(0,false)
 	palt(7,true)
-	_nib_px=64 -- nib x position
-	_nib_py=64 -- nib y position
-	_nib_vx=0  -- nib x velocity
-	_nib_vy=0  -- nib y velocity
-	_nib_lx=64 -- last nib x pos
-	_nib_ly=64 -- last nib y pos
-	_nib_sz=0  -- nib radius
+	_nib_px=64
+	_nib_py=6
+	_nib_vx=0
+	_nib_vy=0
+	_nib_lx=64
+	_nib_ly=64
+	_nib_sz=0
 	_nib_on=false
 	_nib_pr=false
 	_lines=0
@@ -193,7 +225,7 @@ function updatecard()
 	_nib_ly=_nib_py
  -- get input
 	if btnp(🅾️) then
-		refresh()
+		initscreen()
 		return
 	end
  if btnp(🅾️,1) then
