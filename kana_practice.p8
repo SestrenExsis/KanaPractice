@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 18
+version 27
 __lua__
 -- kana practice
 -- by sestrenexsis
@@ -130,6 +130,21 @@ _fills={
 -- on   : using brush
 
 function _init()
+	initfn=initcard
+	updatefn=updatecard
+	drawfn=drawcard
+	initfn()
+end
+
+function _update()
+	updatefn()
+end
+
+function _draw()
+	drawfn()
+end
+
+function initcard()
 	palt(0,false)
 	palt(7,true)
 	_nib_px=64 -- nib x position
@@ -139,27 +154,20 @@ function _init()
 	_nib_lx=64 -- last nib x pos
 	_nib_ly=64 -- last nib y pos
 	_nib_sz=0  -- nib radius
-	newpage()
-end
-
-function newpage(kana)
 	_nib_on=false
 	_nib_pr=false
 	_lines=0
-	if kana==nil then
-		local i=flr(rnd(#_knnam))+1
-		kana=_knnam[i]
-	end
-	_kana=kana
+	local i=flr(rnd(#_knnam))+1
+	_kana=_knnam[i]
 	_inks={{}}
 end
 
-function _update()
+function updatecard()
 	_nib_lx=_nib_px
 	_nib_ly=_nib_py
  -- get input
 	if btnp(🅾️) then
-		newpage()
+		initfn()
 		return
 	end
  if btnp(🅾️,1) then
@@ -236,7 +244,7 @@ function _update()
 	end
 end
 
-function _draw()
+function drawcard()
 	cls(_c_cnv)
 	rect(23,23,120,120,6)
 	local p=strokes(_kana)
