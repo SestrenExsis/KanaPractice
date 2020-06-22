@@ -42,55 +42,71 @@ _dryt={3.4,0.2,0.2,0.2}
 _mous=false
 _hint=false
 
+function kana(
+	n,   -- name    : str
+	r,   -- row pos : number
+	c,   -- col pos : number
+	f    -- frames  : table
+	) -- return type: table
+	local res={
+		name=n,
+		row=r,
+		col=c,
+		frames=f
+	}
+	return res
+end
+
 -- kana info
-_knfrm={}
-_knfrm["a"]={0,1,2,3}
-_knfrm["i"]={4,5}
-_knfrm["u"]={6,7}
-_knfrm["e"]={8,9,10,11}
-_knfrm["o"]={12,13,14,15}
-_knfrm["ka"]={16,17,18}
-_knfrm["ki"]={19,20,21,22}
-_knfrm["ku"]={23}
-_knfrm["ke"]={24,25,26}
-_knfrm["ko"]={27,28}
-_knfrm["sa"]={29,30,31}
-_knfrm["shi"]={32}
-_knfrm["su"]={33,34,35}
-_knfrm["se"]={36,37,38}
-_knfrm["so"]={39,40,41,42}
-_knfrm["ta"]={43,44,45,46}
-_knfrm["chi"]={47,48,49}
-_knfrm["tsu"]={50}
-_knfrm["te"]={51,52}
-_knfrm["to"]={53,54}
-_knfrm["na"]={55,56,57,58,59}
-_knfrm["ni"]={60,61,62}
-_knfrm["nu"]={63,64,65,66}
-_knfrm["ne"]={67,68,69,70,71}
-_knfrm["no"]={72,73}
-_knfrm["ha"]={74,75,76,77}
-_knfrm["hi"]={78,79,80}
-_knfrm["fu"]={81,82,83,84}
-_knfrm["he"]={85}
-_knfrm["ho"]={86,87,88,89,90}
-_knfrm["ma"]={91,92,93,94}
-_knfrm["mi"]={95,96,97,98}
-_knfrm["mu"]={99,100,101,102}
-_knfrm["me"]={103,104,105}
-_knfrm["mo"]={106,107,108}
-_knfrm["ya"]={109,110,111}
-_knfrm["yu"]={112,113,114}
-_knfrm["yo"]={115,116,117}
-_knfrm["ra"]={118,119,120}
-_knfrm["ri"]={121,122}
-_knfrm["ru"]={123,124,125,126}
-_knfrm["re"]={127,128,129,130,131}
-_knfrm["ro"]={132,133,134}
-_knfrm["wa"]={135,136,137,138}
-_knfrm["wo"]={139,140,141,142}
-_knfrm["n"]={143,144}
-_knnam={
+_kana_tbl={
+a=kana("a",0,0,{0,1,2,3}),
+i=kana("i",0,1,{4,5}),
+u=kana("u",0,2,{6,7}),
+e=kana("e",0,3,{8,9,10,11}),
+o=kana("o",0,4,{12,13,14,15}),
+ka=kana("ka",1,0,{16,17,18}),
+ki=kana("ki",1,1,{19,20,21,22}),
+ku=kana("ku",1,2,{23}),
+ke=kana("ke",1,3,{24,25,26}),
+ko=kana("ko",1,4,{27,28}),
+sa=kana("sa",2,0,{29,30,31}),
+shi=kana("shi",2,1,{32}),
+su=kana("su",2,2,{33,34,35}),
+se=kana("se",2,3,{36,37,38}),
+so=kana("so",2,4,{39,40,41,42}),
+ta=kana("ta",3,0,{43,44,45,46}),
+chi=kana("chi",3,1,{47,48,49}),
+tsu=kana("tsu",3,2,{50}),
+te=kana("te",3,3,{51,52}),
+to=kana("to",3,4,{53,54}),
+na=kana("na",4,0,{55,56,57,58,59}),
+ni=kana("ni",4,1,{60,61,62}),
+nu=kana("nu",4,2,{63,64,65,66}),
+ne=kana("ne",4,3,{67,68,69,70,71}),
+no=kana("no",4,4,{72,73}),
+ha=kana("ha",5,0,{74,75,76,77}),
+hi=kana("hi",5,1,{78,79,80}),
+fu=kana("fu",5,2,{81,82,83,84}),
+he=kana("he",5,3,{85}),
+ho=kana("ho",5,4,{86,87,88,89,90}),
+ma=kana("ma",6,0,{91,92,93,94}),
+mi=kana("mi",6,1,{95,96,97,98}),
+mu=kana("mu",6,2,{99,100,101,102}),
+me=kana("me",6,3,{103,104,105}),
+mo=kana("mo",6,4,{106,107,108}),
+ya=kana("ya",7,0,{109,110,111}),
+yu=kana("yu",7,2,{112,113,114}),
+yo=kana("yo",7,4,{115,116,117}),
+ra=kana("ra",8,0,{118,119,120}),
+ri=kana("ri",8,1,{121,122}),
+ru=kana("ru",8,2,{123,124,125,126}),
+re=kana("re",8,3,{127,128,129,130,131}),
+ro=kana("ro",8,4,{132,133,134}),
+wa=kana("wa",9,0,{135,136,137,138}),
+wo=kana("wo",9,4,{139,140,141,142}),
+n=kana("n",10,0,{143,144})
+}
+_kana_key={
  "a","i","u","e","o",
 	"ka","ki","ku","ke","ko",
 	"sa","shi","su","se","so",
@@ -159,6 +175,7 @@ end
 function drawtitle()
 	cls()
 	print("press ❎ to go to menu")
+	drawallkana()
 end
 
 -- menu screen
@@ -215,8 +232,8 @@ function initcard()
 	_nib_on=false
 	_nib_pr=false
 	_lines=0
-	local i=flr(rnd(#_knnam))+1
-	_kana=_knnam[i]
+	local i=flr(rnd(#_kana_key))+1
+	_kana=_kana_key[i]
 	_inks={{}}
 end
 
@@ -420,7 +437,7 @@ function betweens(pt0,pt1)
 	return res
 end
 
-function strokes(kana)
+function strokes(k)
 	local res={}
 	local n={
 		-- orthogonal
@@ -432,7 +449,7 @@ function strokes(kana)
 	local py=-1
 	-- scan through all frames
 	local points={}
-	for id in all(_knfrm[kana]) do
+	for id in all(_kana_tbl[k].frames) do
 		-- find start of stroke
 		local found=false
 		local sx=8*(id%16)
