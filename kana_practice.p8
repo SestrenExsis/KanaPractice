@@ -42,6 +42,88 @@ _dryt={3.4,0.2,0.2,0.2}
 _mous=false
 _hint=false
 
+function point(xpos,ypos)
+	local res={
+		x=xpos,
+		y=ypos
+	}
+	return res
+end
+
+function getstrokes(k)
+	local res={}
+	local n={
+		-- orthogonal
+		-1, 0, 1, 0, 0,-1, 0, 1,
+		-- diagonal
+		-1,-1, 1,-1,-1, 1, 1, 1
+	}
+	local px=-1
+	local py=-1
+	-- scan through all frames
+	local points={}
+	for id in all(k.frames) do
+		-- find start of stroke
+		local found=false
+		local sx=8*(id%16)
+		local sy=8*flr(id/16)
+		for x=0,7 do
+			for y=0,7 do
+				if sget(sx+x,sy+y)==7 then
+					-- start of new stroke
+					if x!=px or y!=py then
+						if #points>0 then
+							add(res,points)
+						end
+						points={}
+					end
+					px=x
+					py=y
+					found=true
+					break
+				end
+				if (found) break
+			end
+		 if (found) break
+		end
+		-- follow stroke path
+		local found=true
+		local lx=0
+		local ly=0
+		local lx2=0
+		local ly2=0
+		while found do
+			local pt=point(px,py)
+			add(points,pt)
+			found=false
+			-- find neighbors
+			for i=1,#n,2 do
+				local nx=px+n[i]
+				local ny=py+n[i+1]
+				if nx>=0 and nx<=7 and
+				   ny>=0 and ny<=7 and
+				   (nx!=lx or ny!=ly) and
+				   (nx!=lx2 or ny!=ly2) then
+					if sget(sx+nx,sy+ny)==14 then
+						lx2=lx
+						ly2=ly
+						lx=px
+						ly=py
+						px=nx
+						py=ny
+						found=true
+						break
+					end
+				end
+			end -- for each neighbor
+		end -- while neighbor found
+	end -- for each stroke frame
+	if #points>0 then
+		add(res,points)
+	end
+	return res
+end
+
 function kana(
 	n,   -- name    : str
 	r,   -- row pos : number
@@ -54,11 +136,12 @@ function kana(
 		col=c,
 		frames=f
 	}
+	res.strokes=getstrokes(res)
 	return res
 end
 
 -- kana info
-_kana_tbl={
+_kanatbl={
 a=kana("a",0,0,{0,1,2,3}),
 i=kana("i",0,1,{4,5}),
 u=kana("u",0,2,{6,7}),
@@ -106,7 +189,7 @@ wa=kana("wa",9,0,{135,136,137,138}),
 wo=kana("wo",9,4,{139,140,141,142}),
 n=kana("n",10,0,{143,144})
 }
-_kana_key={
+_kanakey={
  "a","i","u","e","o",
 	"ka","ki","ku","ke","ko",
 	"sa","shi","su","se","so",
@@ -175,7 +258,6 @@ end
 function drawtitle()
 	cls()
 	print("press ❎ to go to menu")
-	drawallkana()
 end
 
 -- menu screen
@@ -232,8 +314,8 @@ function initcard()
 	_nib_on=false
 	_nib_pr=false
 	_lines=0
-	local i=flr(rnd(#_kana_key))+1
-	_kana=_kana_key[i]
+	local i=flr(rnd(#_kanakey))+1
+	_kana=_kanatbl[_kanakey[i]]
 	_inks={{}}
 end
 
@@ -320,17 +402,18 @@ function updatecard()
 end
 
 function drawcard()
+	local k=_kana
 	cls(_c_cnv)
 	rect(23,23,120,120,6)
-	local p=strokes(_kana)
+	local p=k.strokes
 	-- draw hint
 	if _hint then
-		drawkana(p,64,7,9,2,_c_cut)
+		drawkana(k,64,7,9,2,_c_cut)
 		local i=(12*t())%64
 		i=mid(0,i-16,64)
-		drawkana(p,i,7,9,2,_c_dry)
+		drawkana(k,i,7,9,2,_c_dry)
  	fillp(0b0101111101011111)
-		drawkana(p,64,24,24,12)
+		drawkana(k,64,24,24,12)
 	end
  fillp()
  -- draw ink
@@ -358,7 +441,7 @@ function drawcard()
 			_nib_px,_nib_py,
 	 	max(1,_nib_sz),_c_nib
 		)
-	print(_kana,3,3,1)
+	print(k.name,3,3,1)
 	print(#_inks-1,112,0,1)
 	--local test=testinks(24,24,12)
 	--drawkana(test,64,23,9,2,3)
@@ -371,14 +454,6 @@ function drawcard()
 end
 -->8
 -- helper functions
-
-function point(xpos,ypos)
-	local res={
-		x=xpos,
-		y=ypos
-	}
-	return res
-end
 
 function inkdrop(
 	position,
@@ -437,90 +512,16 @@ function betweens(pt0,pt1)
 	return res
 end
 
-function strokes(k)
-	local res={}
-	local n={
-		-- orthogonal
-		-1, 0, 1, 0, 0,-1, 0, 1,
-		-- diagonal
-		-1,-1, 1,-1,-1, 1, 1, 1
-	}
-	local px=-1
-	local py=-1
-	-- scan through all frames
-	local points={}
-	for id in all(_kana_tbl[k].frames) do
-		-- find start of stroke
-		local found=false
-		local sx=8*(id%16)
-		local sy=8*flr(id/16)
-		for x=0,7 do
-			for y=0,7 do
-				if sget(sx+x,sy+y)==7 then
-					-- start of new stroke
-					if x!=px or y!=py then
-						if #points>0 then
-							add(res,points)
-						end
-						points={}
-					end
-					px=x
-					py=y
-					found=true
-					break
-				end
-				if (found) break
-			end
-		 if (found) break
-		end
-		-- follow stroke path
-		local found=true
-		local lx=0
-		local ly=0
-		local lx2=0
-		local ly2=0
-		while found do
-			local pt=point(px,py)
-			add(points,pt)
-			found=false
-			-- find neighbors
-			for i=1,#n,2 do
-				local nx=px+n[i]
-				local ny=py+n[i+1]
-				if nx>=0 and nx<=7 and
-				   ny>=0 and ny<=7 and
-				   (nx!=lx or ny!=ly) and
-				   (nx!=lx2 or ny!=ly2) then
-					if sget(sx+nx,sy+ny)==14 then
-						lx2=lx
-						ly2=ly
-						lx=px
-						ly=py
-						px=nx
-						py=ny
-						found=true
-						break
-					end
-				end
-			end -- for each neighbor
-		end -- while neighbor found
-	end -- for each stroke frame
-	if #points>0 then
-		add(res,points)
-	end
-	return res
-end
-
 function drawkana(
-	p,   -- points table
+	k,   -- kana
 	i,   -- progression counter
 	x,y, -- upper left corner
 	s,   -- scale in pixels
 	c    -- color
 	) -- return type: bool
 	if (c==nil) c=_c_cut
-	for points in all(p) do
-		for pt in all(points) do
+	for pts in all(k.strokes) do
+		for pt in all(pts) do
 			i-=1
 			if (i<=0) break
 			if s==1 then
@@ -631,7 +632,7 @@ end
 function drawallkana()
 	cls()
 	local s=1 -- scale
-	for k,v in pairs(_knnam) do
+	for k,v in pairs(_kanakey) do
 		local p=strokes(v)
 		local i=0
 		if v~="  " then
