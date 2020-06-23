@@ -23,7 +23,7 @@ __lua__
 -- * ask the player to draw it
 -- * stroke order matters
 -->8
--- constants
+-- constants and constructors
 
 -- accl : speedup when moving
 -- drag : slowdown over time
@@ -216,6 +216,18 @@ _fills={
 	0b0000101000001010,
 	0b0000000000000000
 }
+
+function inkdrop(
+	position,
+	amount
+)
+	local res={
+		pos=position,
+		amt=amount,
+		age=t()
+	}
+	return res
+end
 -->8
 -- main functions
 
@@ -454,18 +466,6 @@ function drawcard()
 end
 -->8
 -- helper functions
-
-function inkdrop(
-	position,
-	amount
-)
-	local res={
-		pos=position,
-		amt=amount,
-		age=t()
-	}
-	return res
-end
 
 function betweens(pt0,pt1)
 	local x0=flr(pt0.x)
