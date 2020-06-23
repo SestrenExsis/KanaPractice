@@ -229,7 +229,7 @@ function inkdrop(
 	return res
 end
 -->8
--- main functions
+-- screens
 
 function _init()
 	inittitle()
@@ -283,18 +283,54 @@ function initmenu()
 	drawfn=drawmenu
 	palt(0,false)
 	palt(7,true)
+	_menuindex=1
+	_menu={
+		"   study deck   ",
+		"practice writing"
+	}
 end
 
 function updatemenu()
+		if (btnp(⬆️)) _menuindex-=1
+		if (btnp(⬇️)) _menuindex+=1
+		_menuindex=1+(_menuindex-1)%#_menu
 	if btnp(❎) then
-		initcard()
+		if (_menuindex==1) initcard()
+		if (_menuindex==2) initcard()
 	end
 end
 
 function drawmenu()
 	cls()
-	print("press ❎ to practice writing")
+	print("press ❎ to select")
+	for i,text in ipairs(_menu) do
+		local c=5
+		if (i==_menuindex) c=7
+		print(text,8,8*i+24,c)
+	end
 end
+
+-- study screen
+
+function initstudy()
+	_debug={
+		screen="study"
+	}
+	initfn=initstudy
+	updatefn=updatestudy
+	drawfn=drawstudy
+	palt(0,false)
+	palt(7,true)
+end
+
+function updatestudy()
+	
+end
+
+function drawstudy()
+	cls(_c_cnv)
+end
+
 
 -- card screen
 
@@ -420,12 +456,12 @@ function drawcard()
 	local p=k.strokes
 	-- draw hint
 	if _hint then
-		drawkana(k,64,7,9,2,_c_cut)
+		drawkana(k,7,9,2,_c_cut)
 		local i=(12*t())%64
 		i=mid(0,i-16,64)
-		drawkana(k,i,7,9,2,_c_dry)
+		drawkana(k,7,9,2,_c_dry,i)
  	fillp(0b0101111101011111)
-		drawkana(k,64,24,24,12)
+		drawkana(k,24,24,12)
 	end
  fillp()
  -- draw ink
@@ -514,12 +550,13 @@ end
 
 function drawkana(
 	k,   -- kana
-	i,   -- progression counter
 	x,y, -- upper left corner
 	s,   -- scale in pixels
-	c    -- color
+	c,   -- color
+	i    -- progression counter
 	) -- return type: bool
 	if (c==nil) c=_c_cut
+	if (i==nil) i=64
 	for pts in all(k.strokes) do
 		for pt in all(pts) do
 			i-=1
