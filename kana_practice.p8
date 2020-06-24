@@ -295,7 +295,7 @@ function updatemenu()
 		if (btnp(⬇️)) _menuindex+=1
 		_menuindex=1+(_menuindex-1)%#_menu
 	if btnp(❎) then
-		if (_menuindex==1) initcard()
+		if (_menuindex==1) initstudy()
 		if (_menuindex==2) initcard()
 	end
 end
@@ -319,18 +319,35 @@ function initstudy()
 	initfn=initstudy
 	updatefn=updatestudy
 	drawfn=drawstudy
-	palt(0,false)
-	palt(7,true)
+	--palt(0,false)
+	--palt(7,true)
+	_cursor=point(0,0)
 end
 
 function updatestudy()
-	
+		if (btnp(⬆️)) _cursor.y-=1
+		if (btnp(⬇️)) _cursor.y+=1
+		if (btnp(⬅️)) _cursor.x-=1
+		if (btnp(➡️)) _cursor.x+=1
+		_cursor.x=_cursor.x%5
+		_cursor.y=_cursor.y%11
 end
 
 function drawstudy()
-	cls(_c_cnv)
+	cls()
+	local cx=_cursor.x
+	local cy=_cursor.y
+	local s=1
+	for n,k in pairs(_kanatbl) do
+		local x=(1.5*s*8)*k.col
+		local y=(1.5*s*8)*k.row
+		local c=1
+		if k.col==cx and k.row==cy then
+			c=7
+		end
+		drawkana(k,x,y,s,c)
+	end
 end
-
 
 -- card screen
 
@@ -663,28 +680,6 @@ function evaluateall(src,trg)
 	return res
 end
 
--->8
--- other functions
-
-function drawallkana()
-	cls()
-	local s=1 -- scale
-	for k,v in pairs(_kanakey) do
-		local p=strokes(v)
-		local i=0
-		if v~="  " then
-			x=(1.5*s*8)*((k-1)%5)
-			y=(1.5*s*8)*(flr((k-1)/5))
-			while (true) do
-				if drawkana(p,i,x,y,s) then
-					break
-				end
-				flip()
-				i+=1
-			end
-		end
-	end
-end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
 0001eee0000e11100001111000011110070000100100007000000000000000000000000000000000000000000000000007eeee01011e1101011111010111110e
