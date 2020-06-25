@@ -322,6 +322,8 @@ function initstudy()
 	--palt(0,false)
 	--palt(7,true)
 	_cursor=point(0,0)
+	_cols=5
+	_rows=11
 end
 
 function updatestudy()
@@ -329,8 +331,8 @@ function updatestudy()
 		if (btnp(⬇️)) _cursor.y+=1
 		if (btnp(⬅️)) _cursor.x-=1
 		if (btnp(➡️)) _cursor.x+=1
-		_cursor.x=_cursor.x%5
-		_cursor.y=_cursor.y%11
+		_cursor.x=_cursor.x%_cols
+		_cursor.y=_cursor.y%_rows
 end
 
 function drawstudy()
@@ -338,14 +340,24 @@ function drawstudy()
 	local cx=_cursor.x
 	local cy=_cursor.y
 	local s=1
+	local selected=nil
 	for n,k in pairs(_kanatbl) do
 		local x=(1.5*s*8)*k.col
-		local y=(1.5*s*8)*k.row
+		local y=(1.3*s*8)*k.row
 		local c=1
 		if k.col==cx and k.row==cy then
 			c=7
+			selected=k
+			rectfill(x,y,x+7,y+7,1)
 		end
 		drawkana(k,x,y,s,c)
+	end
+	if selected==nil then
+		x=(1.5*s*8)*cx
+		y=(1.3*s*8)*cy
+		rectfill(x,y,x+7,y+7,1)
+	else
+		drawkana(selected,60,1,8,7)
 	end
 end
 
