@@ -340,24 +340,29 @@ function drawstudy()
 	local cx=_cursor.x
 	local cy=_cursor.y
 	local s=1
-	local selected=nil
+	local sk=nil
 	for n,k in pairs(_kanatbl) do
 		local x=(1.5*s*8)*k.col
 		local y=(1.3*s*8)*k.row
 		local c=1
 		if k.col==cx and k.row==cy then
 			c=7
-			selected=k
+			sk=k
 			rectfill(x,y,x+7,y+7,1)
 		end
 		drawkana(k,x,y,s,c)
 	end
-	if selected==nil then
+	if sk==nil then
 		x=(1.5*s*8)*cx
 		y=(1.3*s*8)*cy
 		rectfill(x,y,x+7,y+7,1)
 	else
-		drawkana(selected,60,1,8,7)
+		rect(60,1,61+66,2+66,6)
+		drawkana(sk,62,3,8,_c_cut)
+		local i=(12*t())%64
+		i=mid(0,i-16,64)
+		drawkana(sk,62,3,8,_c_dry,i)
+		print(sk.name,61,68,6)
 	end
 end
 
@@ -482,7 +487,6 @@ function drawcard()
 	local k=_kana
 	cls(_c_cnv)
 	rect(23,23,120,120,6)
-	local p=k.strokes
 	-- draw hint
 	if _hint then
 		drawkana(k,7,9,2,_c_cut)
