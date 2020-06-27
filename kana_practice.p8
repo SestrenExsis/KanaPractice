@@ -245,7 +245,6 @@ end
 
 function _draw()
 	drawfn()
-	print(_debug.screen,1,122,1)
 end
 
 -- title screen
@@ -269,6 +268,7 @@ end
 
 function drawtitle()
 	cls()
+	cursor(0,114,1)
 	print("press ❎ to go to menu")
 end
 
@@ -302,6 +302,7 @@ end
 
 function drawmenu()
 	cls()
+	cursor(0,114,1)
 	print("press ❎ to select")
 	for i,text in ipairs(_menu) do
 		local c=5
@@ -327,12 +328,13 @@ function initstudy()
 end
 
 function updatestudy()
-		if (btnp(⬆️)) _cursor.y-=1
-		if (btnp(⬇️)) _cursor.y+=1
-		if (btnp(⬅️)) _cursor.x-=1
-		if (btnp(➡️)) _cursor.x+=1
-		_cursor.x=_cursor.x%_cols
-		_cursor.y=_cursor.y%_rows
+	if (btnp(⬆️)) _cursor.y-=1
+	if (btnp(⬇️)) _cursor.y+=1
+	if (btnp(⬅️)) _cursor.x-=1
+	if (btnp(➡️)) _cursor.x+=1
+	_cursor.x=_cursor.x%_cols
+	_cursor.y=_cursor.y%_rows
+	if (btnp(🅾️)) initmenu()
 end
 
 function drawstudy()
@@ -362,8 +364,10 @@ function drawstudy()
 		local i=(12*t())%64
 		i=mid(0,i-16,64)
 		drawkana(sk,62,3,8,_c_dry,i)
-		print(sk.name,61,68,6)
+		print(sk.name,61,70,6)
 	end
+	cursor(0,114,1)
+	print("press 🅾️ to quit studying")
 end
 
 -- card screen
@@ -406,6 +410,9 @@ function updatecard()
 	_nib_ly=_nib_py
  -- get input
 	if btnp(🅾️) then
+		initmenu()
+		return
+	elseif btnp(➡️,1) then
 		initscreen()
 		return
 	end
