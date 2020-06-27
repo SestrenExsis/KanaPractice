@@ -229,7 +229,7 @@ function inkdrop(
 	return res
 end
 -->8
--- screens
+-- main functions
 
 function _init()
 	inittitle()
@@ -247,300 +247,6 @@ function _draw()
 	drawfn()
 end
 
--- title screen
-
-function inittitle()
-	_debug={
-		screen="title"
-	}
-	initfn=inittitle
-	updatefn=updatetitle
-	drawfn=drawtitle
-	palt(0,false)
-	palt(7,true)
-end
-
-function updatetitle()
-	if btnp(❎) then
-		initmenu()
-	end
-end
-
-function drawtitle()
-	cls()
-	cursor(0,114,1)
-	print("press ❎ to go to menu")
-end
-
--- menu screen
-
-function initmenu()
-	_debug={
-		screen="main menu"
-	}
-	initfn=initmenu
-	updatefn=updatemenu
-	drawfn=drawmenu
-	palt(0,false)
-	palt(7,true)
-	_menuindex=1
-	_menu={
-		"   study deck   ",
-		"practice writing"
-	}
-end
-
-function updatemenu()
-		if (btnp(⬆️)) _menuindex-=1
-		if (btnp(⬇️)) _menuindex+=1
-		_menuindex=1+(_menuindex-1)%#_menu
-	if btnp(❎) then
-		if (_menuindex==1) initstudy()
-		if (_menuindex==2) initcard()
-	end
-end
-
-function drawmenu()
-	cls()
-	cursor(0,114,1)
-	print("press ❎ to select")
-	for i,text in ipairs(_menu) do
-		local c=5
-		if (i==_menuindex) c=7
-		print(text,8,8*i+24,c)
-	end
-end
-
--- study screen
-
-function initstudy()
-	_debug={
-		screen="study"
-	}
-	initfn=initstudy
-	updatefn=updatestudy
-	drawfn=drawstudy
-	--palt(0,false)
-	--palt(7,true)
-	_cursor=point(0,0)
-	_cols=5
-	_rows=11
-end
-
-function updatestudy()
-	if (btnp(⬆️)) _cursor.y-=1
-	if (btnp(⬇️)) _cursor.y+=1
-	if (btnp(⬅️)) _cursor.x-=1
-	if (btnp(➡️)) _cursor.x+=1
-	_cursor.x=_cursor.x%_cols
-	_cursor.y=_cursor.y%_rows
-	if (btnp(🅾️)) initmenu()
-end
-
-function drawstudy()
-	cls()
-	local cx=_cursor.x
-	local cy=_cursor.y
-	local s=1
-	local sk=nil
-	for n,k in pairs(_kanatbl) do
-		local x=(1.5*s*8)*k.col
-		local y=(1.3*s*8)*k.row
-		local c=1
-		if k.col==cx and k.row==cy then
-			c=7
-			sk=k
-			rectfill(x,y,x+7,y+7,1)
-		end
-		drawkana(k,x,y,s,c)
-	end
-	if sk==nil then
-		x=(1.5*s*8)*cx
-		y=(1.3*s*8)*cy
-		rectfill(x,y,x+7,y+7,1)
-	else
-		rect(60,1,61+66,2+66,6)
-		drawkana(sk,62,3,8,_c_cut)
-		local i=(12*t())%64
-		i=mid(0,i-16,64)
-		drawkana(sk,62,3,8,_c_dry,i)
-		print(sk.name,61,70,6)
-	end
-	cursor(0,114,1)
-	print("press 🅾️ to quit studying")
-end
-
--- card screen
-
--- px : x position
--- py : y position
--- vx : x velocity
--- vy : y velocity
--- lx : last x pos
--- ly : last y pos
--- sz : brush radius
--- on : using brush
-
-function initcard()
-	_debug={
-		screen="card"
-	}
-	initfn=initcard
-	updatefn=updatecard
-	drawfn=drawcard
-	palt(0,false)
-	palt(7,true)
-	_nib_px=64
-	_nib_py=6
-	_nib_vx=0
-	_nib_vy=0
-	_nib_lx=64
-	_nib_ly=64
-	_nib_sz=0
-	_nib_on=false
-	_nib_pr=false
-	_lines=0
-	local i=flr(rnd(#_kanakey))+1
-	_kana=_kanatbl[_kanakey[i]]
-	_inks={{}}
-end
-
-function updatecard()
-	_nib_lx=_nib_px
-	_nib_ly=_nib_py
- -- get input
-	if btnp(🅾️) then
-		initmenu()
-		return
-	elseif btnp(➡️,1) then
-		initscreen()
-		return
-	end
- if btnp(🅾️,1) then
- 	_mous=not _mous
- 	sfx(0)
- end
- if btnp(❎,1) then
- 	_hint=not _hint
- 	sfx(0)
- end
-	if _mous then
-		poke(0x5f2d,1)
-		_nib_pr=_nib_on
-		_nib_on=btn(❎) or stat(34)==1
-		_nib_px=stat(32)
-		_nib_py=stat(33)
-		_nib_vx=_nib_px-_nib_lx
-		_nib_vy=_nib_py-_nib_ly
-	else
-		_nib_pr=_nib_on
-		_nib_on=btn(❎)
-		if (btn(⬆️)) _nib_vy-=_accl
-		if (btn(⬇️)) _nib_vy+=_accl
-		if (btn(⬅️)) _nib_vx-=_accl
-		if (btn(➡️)) _nib_vx+=_accl
-	end
-	if _nib_pr and _nib_on then
-		_nib_pr=false
-	end
-	-- update pen physics
-	if _nib_vx>0 then
-		_nib_vx-=_drag
-		_nib_vx=max(0,_nib_vx)
-	else
-		_nib_vx+=_drag
-		_nib_vx=min(0,_nib_vx)
-	end
-	if _nib_vy>0 then
-		_nib_vy-=_drag
-		_nib_vy=max(0,_nib_vy)
-	else
-		_nib_vy+=_drag
-		_nib_vy=min(0,_nib_vy)
-	end
-	if (not _mous) then
-		local multi=1.000
-		if (_nib_on) multi=_pull
-		if (_nib_vx~=0) then
-			_nib_px+=multi*_nib_vx
-		end
-		if (_nib_vy~=0) then
-			_nib_py+=multi*_nib_vy
-		end
-	end
-	-- keep pen in bounds
-	_nib_px=mid(0,_nib_px,127)
-	_nib_py=mid(0,_nib_py,127)
-	-- update ink effects
-	if (_nib_pr) add(_inks,{})
-	if _nib_on then
-		_nib_sz+=_pool
-	else
-		_nib_sz-=_pool
-	end
-	_nib_sz=mid(0,_nib_sz,_maxr)
-	local l=point(_nib_lx,_nib_ly)
-	local p=point(_nib_px,_nib_py)
-	local pts=betweens(l,p)
-	if _nib_sz>0 then
-		for pt in all(pts) do
-			local ink=inkdrop(pt,_nib_sz)
-			add(_inks[#_inks],ink)
-		end
-	end
-end
-
-function drawcard()
-	local k=_kana
-	cls(_c_cnv)
-	rect(23,23,120,120,6)
-	-- draw hint
-	if _hint then
-		drawkana(k,7,9,2,_c_cut)
-		local i=(12*t())%64
-		i=mid(0,i-16,64)
-		drawkana(k,7,9,2,_c_dry,i)
- 	fillp(0b0101111101011111)
-		drawkana(k,24,24,12)
-	end
- fillp()
- -- draw ink
- for inks in all (_inks) do
- 	for ink in all(inks) do
- 		local age=t()-ink.age
- 		local fill=_fills[#_fills]
- 		for i=1,#_dryt do
- 			age-=_dryt[i]
- 			if age<0 then
- 				fill=_fills[i]
- 				break
- 			end
- 		end
- 		fillp(fill)
- 		local pos=ink.pos
- 		circfill(
- 			pos.x,pos.y,
- 			ink.amt,_c_ink
- 		)
- 	end
-	end
-		fillp()
-		circfill(
-			_nib_px,_nib_py,
-	 	max(1,_nib_sz),_c_nib
-		)
-	print(k.name,3,3,1)
-	print(#_inks-1,112,0,1)
-	--local test=testinks(24,24,12)
-	--drawkana(test,64,23,9,2,3)
-	--local evals=evaluateall(test,p)
-	--for i=1,#evals do
-	--	local ev=evals[i]
-	--	local msg=ev[1].." "..ev[2]
-	--	print(msg,104,8*i,1)
-	--end
-end
--->8
 -- helper functions
 
 function betweens(pt0,pt1)
@@ -703,6 +409,334 @@ function evaluateall(src,trg)
 	return res
 end
 
+-->8
+-- title screen
+
+function inittitle()
+	_debug={
+		screen="title"
+	}
+	initfn=inittitle
+	updatefn=updatetitle
+	drawfn=drawtitle
+	palt(0,false)
+	palt(7,true)
+end
+
+function updatetitle()
+	if btnp(❎) then
+		initmenu()
+	end
+end
+
+function drawtitle()
+	cls()
+	cursor(0,114,1)
+	print("press ❎ to go to menu")
+end
+-->8
+-- menu screen
+
+function initmenu()
+	_debug={
+		screen="main menu"
+	}
+	initfn=initmenu
+	updatefn=updatemenu
+	drawfn=drawmenu
+	palt(0,false)
+	palt(7,true)
+	_menuindex=1
+	_menu={
+		"   study deck   ",
+		"practice reading",
+		"practice writing"
+	}
+end
+
+function updatemenu()
+		if (btnp(⬆️)) _menuindex-=1
+		if (btnp(⬇️)) _menuindex+=1
+		_menuindex=1+(_menuindex-1)%#_menu
+	if btnp(❎) then
+		if (_menuindex==1) initstudy()
+		if (_menuindex==2) initread()
+		if (_menuindex==3) initwrite()
+	end
+end
+
+function drawmenu()
+	cls()
+	cursor(0,114,1)
+	print("press ❎ to select")
+	for i,text in ipairs(_menu) do
+		local c=5
+		if (i==_menuindex) c=7
+		print(text,8,8*i+24,c)
+	end
+end
+-->8
+-- study screen
+
+function initstudy()
+	_debug={
+		screen="study"
+	}
+	initfn=initstudy
+	updatefn=updatestudy
+	drawfn=drawstudy
+	--palt(0,false)
+	--palt(7,true)
+	_cursor=point(0,0)
+	_cols=5
+	_rows=11
+end
+
+function updatestudy()
+	if (btnp(⬆️)) _cursor.y-=1
+	if (btnp(⬇️)) _cursor.y+=1
+	if (btnp(⬅️)) _cursor.x-=1
+	if (btnp(➡️)) _cursor.x+=1
+	_cursor.x=_cursor.x%_cols
+	_cursor.y=_cursor.y%_rows
+	if (btnp(🅾️)) initmenu()
+end
+
+function drawstudy()
+	cls()
+	local cx=_cursor.x
+	local cy=_cursor.y
+	local s=1
+	local sk=nil
+	for n,k in pairs(_kanatbl) do
+		local x=(1.5*s*8)*k.col
+		local y=(1.3*s*8)*k.row
+		local c=1
+		if k.col==cx and k.row==cy then
+			c=7
+			sk=k
+			rectfill(x,y,x+7,y+7,1)
+		end
+		drawkana(k,x,y,s,c)
+	end
+	if sk==nil then
+		x=(1.5*s*8)*cx
+		y=(1.3*s*8)*cy
+		rectfill(x,y,x+7,y+7,1)
+	else
+		rect(60,1,61+66,2+66,6)
+		drawkana(sk,62,3,8,_c_cut)
+		local i=(12*t())%64
+		i=mid(0,i-16,64)
+		drawkana(sk,62,3,8,_c_dry,i)
+		print(sk.name,61,70,6)
+	end
+	cursor(0,114,1)
+	print("press 🅾️ to quit studying")
+end
+-->8
+-- read screen
+
+function initread()
+	_debug={
+		screen="read"
+	}
+	initfn=initread
+	updatefn=updateread
+	drawfn=drawread
+	local i=flr(rnd(#_kanakey))+1
+	_kana=_kanatbl[_kanakey[i]]
+end
+
+function updateread()
+ -- get input
+	if btnp(🅾️) then
+		initmenu()
+		return
+	elseif btnp(➡️,1) then
+		initscreen()
+		return
+	end
+end
+
+function drawread()
+	local k=_kana
+	cls(_c_cnv)
+	drawkana(k,62,3,8,_c_cut)
+	cursor(0,114,1)
+	print("press 🅾️ to quit reading")
+end
+-->8
+-- write screen
+
+-- px : x position
+-- py : y position
+-- vx : x velocity
+-- vy : y velocity
+-- lx : last x pos
+-- ly : last y pos
+-- sz : brush radius
+-- on : using brush
+
+function initwrite()
+	_debug={
+		screen="write"
+	}
+	initfn=initwrite
+	updatefn=updatewrite
+	drawfn=drawwrite
+	palt(0,false)
+	palt(7,true)
+	_nib_px=64
+	_nib_py=6
+	_nib_vx=0
+	_nib_vy=0
+	_nib_lx=64
+	_nib_ly=64
+	_nib_sz=0
+	_nib_on=false
+	_nib_pr=false
+	_lines=0
+	local i=flr(rnd(#_kanakey))+1
+	_kana=_kanatbl[_kanakey[i]]
+	_inks={{}}
+end
+
+function updatewrite()
+	_nib_lx=_nib_px
+	_nib_ly=_nib_py
+ -- get input
+	if btnp(🅾️) then
+		initmenu()
+		return
+	elseif btnp(➡️,1) then
+		initscreen()
+		return
+	end
+ if btnp(🅾️,1) then
+ 	_mous=not _mous
+ 	sfx(0)
+ end
+ if btnp(❎,1) then
+ 	_hint=not _hint
+ 	sfx(0)
+ end
+	if _mous then
+		poke(0x5f2d,1)
+		_nib_pr=_nib_on
+		_nib_on=btn(❎) or stat(34)==1
+		_nib_px=stat(32)
+		_nib_py=stat(33)
+		_nib_vx=_nib_px-_nib_lx
+		_nib_vy=_nib_py-_nib_ly
+	else
+		_nib_pr=_nib_on
+		_nib_on=btn(❎)
+		if (btn(⬆️)) _nib_vy-=_accl
+		if (btn(⬇️)) _nib_vy+=_accl
+		if (btn(⬅️)) _nib_vx-=_accl
+		if (btn(➡️)) _nib_vx+=_accl
+	end
+	if _nib_pr and _nib_on then
+		_nib_pr=false
+	end
+	-- update pen physics
+	if _nib_vx>0 then
+		_nib_vx-=_drag
+		_nib_vx=max(0,_nib_vx)
+	else
+		_nib_vx+=_drag
+		_nib_vx=min(0,_nib_vx)
+	end
+	if _nib_vy>0 then
+		_nib_vy-=_drag
+		_nib_vy=max(0,_nib_vy)
+	else
+		_nib_vy+=_drag
+		_nib_vy=min(0,_nib_vy)
+	end
+	if (not _mous) then
+		local multi=1.000
+		if (_nib_on) multi=_pull
+		if (_nib_vx~=0) then
+			_nib_px+=multi*_nib_vx
+		end
+		if (_nib_vy~=0) then
+			_nib_py+=multi*_nib_vy
+		end
+	end
+	-- keep pen in bounds
+	_nib_px=mid(0,_nib_px,127)
+	_nib_py=mid(0,_nib_py,127)
+	-- update ink effects
+	if (_nib_pr) add(_inks,{})
+	if _nib_on then
+		_nib_sz+=_pool
+	else
+		_nib_sz-=_pool
+	end
+	_nib_sz=mid(0,_nib_sz,_maxr)
+	local l=point(_nib_lx,_nib_ly)
+	local p=point(_nib_px,_nib_py)
+	local pts=betweens(l,p)
+	if _nib_sz>0 then
+		for pt in all(pts) do
+			local ink=inkdrop(pt,_nib_sz)
+			add(_inks[#_inks],ink)
+		end
+	end
+end
+
+function drawwrite()
+	local k=_kana
+	cls(_c_cnv)
+	rect(23,23,120,120,6)
+	-- draw hint
+	if _hint then
+		drawkana(k,7,9,2,_c_cut)
+		local i=(12*t())%64
+		i=mid(0,i-16,64)
+		drawkana(k,7,9,2,_c_dry,i)
+ 	fillp(0b0101111101011111)
+		drawkana(k,24,24,12)
+	end
+ fillp()
+ -- draw ink
+ for inks in all (_inks) do
+ 	for ink in all(inks) do
+ 		local age=t()-ink.age
+ 		local fill=_fills[#_fills]
+ 		for i=1,#_dryt do
+ 			age-=_dryt[i]
+ 			if age<0 then
+ 				fill=_fills[i]
+ 				break
+ 			end
+ 		end
+ 		fillp(fill)
+ 		local pos=ink.pos
+ 		circfill(
+ 			pos.x,pos.y,
+ 			ink.amt,_c_ink
+ 		)
+ 	end
+	end
+		fillp()
+		circfill(
+			_nib_px,_nib_py,
+	 	max(1,_nib_sz),_c_nib
+		)
+	print(k.name,3,3,1)
+	print(#_inks-1,112,0,1)
+	--local test=testinks(24,24,12)
+	--drawkana(test,64,23,9,2,3)
+	--local evals=evaluateall(test,p)
+	--for i=1,#evals do
+	--	local ev=evals[i]
+	--	local msg=ev[1].." "..ev[2]
+	--	print(msg,104,8*i,1)
+	--end
+end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
 0001eee0000e11100001111000011110070000100100007000000000000000000000000000000000000000000000000007eeee01011e1101011111010111110e
