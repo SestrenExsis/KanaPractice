@@ -190,7 +190,7 @@ wo=kana("wo",9,4,{139,140,141,142}),
 n=kana("n",10,0,{143,144})
 }
 _kanakey={
- "a","i","u","e","o",
+	"a","i","u","e","o",
 	"ka","ki","ku","ke","ko",
 	"sa","shi","su","se","so",
 	"ta","chi","tsu","te","to",
@@ -537,6 +537,10 @@ end
 -->8
 -- read screen
 
+-- states
+-- * guess : show symbol
+-- * check : show name
+
 function initread()
 	_debug={
 		screen="read"
@@ -546,25 +550,50 @@ function initread()
 	drawfn=drawread
 	local i=flr(rnd(#_kanakey))+1
 	_kana=_kanatbl[_kanakey[i]]
+	_state="guess"
 end
 
 function updateread()
- -- get input
-	if btnp(🅾️) then
-		initmenu()
-		return
-	elseif btnp(➡️,1) then
-		initscreen()
-		return
+	-- get input
+	if _state=="guess" then
+		if btnp(❎) then
+			_state="check"
+		elseif btnp(🅾️) then
+			initmenu()
+			return
+		end
+	else
+		if btnp(❎) then
+			-- you got it right
+			_state="guess"
+			initscreen()
+			return
+		elseif btnp(🅾️) then
+			-- you got it wrong
+			_state="guess"
+			initscreen()
+			return
+		end
 	end
 end
 
 function drawread()
-	local k=_kana
 	cls(_c_cnv)
+	local k=_kana
 	drawkana(k,62,3,8,_c_cut)
-	cursor(0,114,1)
-	print("press 🅾️ to quit reading")
+	if _state=="guess" then
+		cursor(1,96,1)
+		print("say the kana out loud")
+		print("")
+		print("press ❎ to reveal the answer")
+		print("press 🅾️ to quit")
+	else
+		cursor(1,96,1)
+		print("the answer was "..k.name)
+		print("")
+		print("press ❎ if you were correct")
+		print("press 🅾️ otherwise")
+	end
 end
 -->8
 -- write screen
@@ -605,7 +634,7 @@ end
 function updatewrite()
 	_nib_lx=_nib_px
 	_nib_ly=_nib_py
- -- get input
+	-- get input
 	if btnp(🅾️) then
 		initmenu()
 		return
@@ -613,14 +642,14 @@ function updatewrite()
 		initscreen()
 		return
 	end
- if btnp(🅾️,1) then
- 	_mous=not _mous
- 	sfx(0)
- end
- if btnp(❎,1) then
- 	_hint=not _hint
- 	sfx(0)
- end
+	if btnp(🅾️,1) then
+		_mous=not _mous
+		sfx(0)
+	end
+	if btnp(❎,1) then
+		_hint=not _hint
+		sfx(0)
+	end
 	if _mous then
 		poke(0x5f2d,1)
 		_nib_pr=_nib_on
@@ -697,29 +726,29 @@ function drawwrite()
 		local i=(12*t())%64
 		i=mid(0,i-16,64)
 		drawkana(k,7,9,2,_c_dry,i)
- 	fillp(0b0101111101011111)
+		fillp(0b0101111101011111)
 		drawkana(k,24,24,12)
 	end
- fillp()
- -- draw ink
- for inks in all (_inks) do
- 	for ink in all(inks) do
- 		local age=t()-ink.age
- 		local fill=_fills[#_fills]
- 		for i=1,#_dryt do
- 			age-=_dryt[i]
- 			if age<0 then
- 				fill=_fills[i]
- 				break
- 			end
- 		end
- 		fillp(fill)
- 		local pos=ink.pos
- 		circfill(
- 			pos.x,pos.y,
- 			ink.amt,_c_ink
- 		)
- 	end
+	fillp()
+	-- draw ink
+	for inks in all (_inks) do
+		for ink in all(inks) do
+			local age=t()-ink.age
+			local fill=_fills[#_fills]
+			for i=1,#_dryt do
+				age-=_dryt[i]
+				if age<0 then
+					fill=_fills[i]
+					break
+				end
+			end
+			fillp(fill)
+			local pos=ink.pos
+			circfill(
+				pos.x,pos.y,
+				ink.amt,_c_ink
+			)
+		end
 	end
 		fillp()
 		circfill(
