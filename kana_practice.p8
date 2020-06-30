@@ -40,7 +40,6 @@ _pool=0.200
 _maxr=5.000
 _dryt={3.4,0.2,0.2,0.2}
 _mous=false
-_hint=false
 
 function point(xpos,ypos)
 	local res={
@@ -598,6 +597,10 @@ end
 -->8
 -- write screen
 
+-- states
+-- * guess : show name
+-- * check : show stroke order
+
 -- px : x position
 -- py : y position
 -- vx : x velocity
@@ -629,19 +632,14 @@ function initwrite()
 	local i=flr(rnd(#_kanakey))+1
 	_kana=_kanatbl[_kanakey[i]]
 	_inks={{}}
+	_hint=false
+	_state="guess"
 end
 
-function updatewrite()
+function updatewriteguess()
 	_nib_lx=_nib_px
 	_nib_ly=_nib_py
 	-- get input
-	if btnp(🅾️) then
-		initmenu()
-		return
-	elseif btnp(➡️,1) then
-		initscreen()
-		return
-	end
 	if btnp(🅾️,1) then
 		_mous=not _mous
 		sfx(0)
@@ -716,11 +714,37 @@ function updatewrite()
 	end
 end
 
+function updatewrite()
+	if _state=="guess" then
+		if btnp(🅾️) then
+			_state="check"
+			return
+		else
+			updatewriteguess()
+		end
+	else
+		if btnp(❎) then
+			-- you got it right
+			_state="guess"
+			initscreen()
+			return
+		elseif btnp(🅾️) then
+			-- you got it wrong
+			_state="guess"
+			initscreen()
+			return
+		end
+	end
+end
+
 function drawwrite()
-	local k=_kana
 	cls(_c_cnv)
+	local k=_kana
 	rect(23,23,120,120,6)
 	-- draw hint
+	if _state=="check" then
+		_hint=true
+	end
 	if _hint then
 		drawkana(k,7,9,2,_c_cut)
 		local i=(12*t())%64
@@ -757,14 +781,15 @@ function drawwrite()
 		)
 	print(k.name,3,3,1)
 	print(#_inks-1,112,0,1)
-	--local test=testinks(24,24,12)
-	--drawkana(test,64,23,9,2,3)
-	--local evals=evaluateall(test,p)
-	--for i=1,#evals do
-	--	local ev=evals[i]
-	--	local msg=ev[1].." "..ev[2]
-	--	print(msg,104,8*i,1)
-	--end
+	if _state=="guess" then
+		cursor(1,108,1)
+		print("write the kana")
+		print("press 🅾️ when finished")
+	else
+		cursor(1,108,1)
+		print("press ❎ if you were correct")
+		print("press 🅾️ otherwise")
+	end
 end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
