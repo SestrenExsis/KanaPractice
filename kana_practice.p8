@@ -544,9 +544,15 @@ function initread()
 	_debug={
 		screen="read"
 	}
-	initfn=initread
+	initfn=nextread
 	updatefn=updateread
 	drawfn=drawread
+	nextread()
+	_errors=0
+	_guesses=0
+end
+
+function nextread()
 	local i=flr(rnd(#_kanakey))+1
 	_kana=_kanatbl[_kanakey[i]]
 	_state="guess"
@@ -565,11 +571,14 @@ function updateread()
 		if btnp(❎) then
 			-- you got it right
 			_state="guess"
+			_guesses+=1
 			initscreen()
 			return
 		elseif btnp(🅾️) then
 			-- you got it wrong
 			_state="guess"
+			_errors+=1
+			_guesses+=1
 			initscreen()
 			return
 		end
@@ -581,18 +590,20 @@ function drawread()
 	local k=_kana
 	drawkana(k,62,3,8,_c_cut)
 	if _state=="guess" then
-		cursor(1,96,1)
+		cursor(1,90,1)
 		print("say the kana out loud")
 		print("")
 		print("press ❎ to reveal the answer")
 		print("press 🅾️ to quit")
 	else
-		cursor(1,96,1)
+		cursor(1,90,1)
 		print("the answer was "..k.name)
 		print("")
 		print("press ❎ if you were correct")
 		print("press 🅾️ otherwise")
 	end
+	local correct=_guesses-_errors
+	print(correct.." / ".._guesses)
 end
 -->8
 -- write screen
@@ -614,11 +625,17 @@ function initwrite()
 	_debug={
 		screen="write"
 	}
-	initfn=initwrite
+	initfn=nextwrite
 	updatefn=updatewrite
 	drawfn=drawwrite
 	palt(0,false)
 	palt(7,true)
+	nextwrite()
+	_errors=0
+	_guesses=0
+end
+
+function nextwrite()
 	_nib_px=64
 	_nib_py=6
 	_nib_vx=0
@@ -726,11 +743,14 @@ function updatewrite()
 		if btnp(❎) then
 			-- you got it right
 			_state="guess"
+			_guesses+=1
 			initscreen()
 			return
 		elseif btnp(🅾️) then
 			-- you got it wrong
 			_state="guess"
+			_errors+=1
+			_guesses+=1
 			initscreen()
 			return
 		end
@@ -782,14 +802,16 @@ function drawwrite()
 	print(k.name,3,3,1)
 	print(#_inks-1,112,0,1)
 	if _state=="guess" then
-		cursor(1,108,1)
+		cursor(1,102,1)
 		print("write the kana")
 		print("press 🅾️ when finished")
 	else
-		cursor(1,108,1)
+		cursor(1,102,1)
 		print("press ❎ if you were correct")
 		print("press 🅾️ otherwise")
 	end
+	local correct=_guesses-_errors
+	print(correct.." / ".._guesses)
 end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
