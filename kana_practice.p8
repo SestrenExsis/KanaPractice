@@ -539,6 +539,7 @@ end
 -- states
 -- * guess : show symbol
 -- * check : show name
+-- * stats : show stats
 
 function initread()
 	_debug={
@@ -564,18 +565,19 @@ function updateread()
 		if btnp(❎) or btnp(🅾️) then
 			_state="check"
 		end
-	else
+	elseif _state=="check" then
 		if btnp(⬆️) then
 			-- you got it right
-			_state="guess"
+			_state="stats"
 			_guesses+=1
-			initscreen()
-			return
 		elseif btnp(⬇️) then
 			-- you got it wrong
-			_state="guess"
+			_state="stats"
 			_errors+=1
 			_guesses+=1
+		end
+	elseif _state=="stats" then
+		if btnp(❎) then
 			initscreen()
 			return
 		elseif btnp(🅾️) then
@@ -594,16 +596,19 @@ function drawread()
 		print("say the kana out loud")
 		print("")
 		print("press ❎ or 🅾️ to check")
-	else
+	elseif _state=="check" then
 		cursor(1,84,1)
 		print("the answer was "..k.name)
 		print("")
 		print("press ⬆️ if you were correct")
 		print("press ⬇️ if you were not")
+	elseif _state=="stats" then
+		cursor(1,90,1)
+		print("press ❎ to read another")
 		print("press 🅾️ to quit")
+		local correct=_guesses-_errors
+		print(correct.." / ".._guesses)
 	end
-	local correct=_guesses-_errors
-	print(correct.." / ".._guesses)
 end
 -->8
 -- write screen
@@ -611,6 +616,7 @@ end
 -- states
 -- * guess : show name
 -- * check : show stroke order
+-- * stats : show stats
 
 -- px : x position
 -- py : y position
