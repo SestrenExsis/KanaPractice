@@ -561,25 +561,25 @@ end
 function updateread()
 	-- get input
 	if _state=="guess" then
-		if btnp(❎) then
+		if btnp(❎) or btnp(🅾️) then
 			_state="check"
-		elseif btnp(🅾️) then
-			initmenu()
-			return
 		end
 	else
-		if btnp(❎) then
+		if btnp(⬆️) then
 			-- you got it right
 			_state="guess"
 			_guesses+=1
 			initscreen()
 			return
-		elseif btnp(🅾️) then
+		elseif btnp(⬇️) then
 			-- you got it wrong
 			_state="guess"
 			_errors+=1
 			_guesses+=1
 			initscreen()
+			return
+		elseif btnp(🅾️) then
+			initmenu()
 			return
 		end
 	end
@@ -590,17 +590,17 @@ function drawread()
 	local k=_kana
 	drawkana(k,62,3,8,_c_cut)
 	if _state=="guess" then
-		cursor(1,90,1)
+		cursor(1,96,1)
 		print("say the kana out loud")
 		print("")
-		print("press ❎ to reveal the answer")
-		print("press 🅾️ to quit")
+		print("press ❎ or 🅾️ to check")
 	else
-		cursor(1,90,1)
+		cursor(1,84,1)
 		print("the answer was "..k.name)
 		print("")
-		print("press ❎ if you were correct")
-		print("press 🅾️ otherwise")
+		print("press ⬆️ if you were correct")
+		print("press ⬇️ if you were not")
+		print("press 🅾️ to quit")
 	end
 	local correct=_guesses-_errors
 	print(correct.." / ".._guesses)
@@ -740,18 +740,21 @@ function updatewrite()
 			updatewriteguess()
 		end
 	else
-		if btnp(❎) then
+		if btnp(⬆️) then
 			-- you got it right
 			_state="guess"
 			_guesses+=1
 			initscreen()
 			return
-		elseif btnp(🅾️) then
+		elseif btnp(⬇️) then
 			-- you got it wrong
 			_state="guess"
 			_errors+=1
 			_guesses+=1
 			initscreen()
+			return
+		elseif btnp(🅾️) then
+			initmenu()
 			return
 		end
 	end
@@ -806,9 +809,10 @@ function drawwrite()
 		print("write the kana")
 		print("press 🅾️ when finished")
 	else
-		cursor(1,102,1)
-		print("press ❎ if you were correct")
-		print("press 🅾️ otherwise")
+		cursor(1,96,1)
+		print("press ⬆️ if you were correct")
+		print("press ⬇️ if you were not")
+		print("press 🅾️ to quit")
 	end
 	local correct=_guesses-_errors
 	print(correct.." / ".._guesses)
