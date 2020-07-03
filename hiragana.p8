@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 27
 __lua__
--- kana practice
+-- hiragana
 -- by sestrenexsis
 -- github.com/sestrenexsis/kanapractice
 
