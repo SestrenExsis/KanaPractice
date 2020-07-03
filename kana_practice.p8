@@ -469,9 +469,17 @@ function drawmenu()
 	cursor(0,114,1)
 	print("press ❎ to select")
 	for i,text in ipairs(_menu) do
-		local c=5
-		if (i==_menuindex) c=7
-		print(text,8,8*i+24,c)
+		local bc=7
+		local fc=3
+		if i==_menuindex then
+			bc=3
+			fc=7
+		end
+		local x=28
+		local y=34+13*i
+		rectfill(x+1,y,x+70,y+11,bc)
+		rectfill(x,y+1,x+71,y+10,bc)
+		print(text,33,y+3,fc)
 	end
 end
 -->8
