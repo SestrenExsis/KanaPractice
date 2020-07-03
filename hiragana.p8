@@ -231,6 +231,19 @@ end
 -- main functions
 
 function _init()
+	cartdata("sestrenexsis_hiragana_0")
+	local yr=stat(80) --4-digit
+	local mo=stat(81) --1..12
+	local dy=stat(82) --1..31
+	local hr=stat(83) --0..23
+	local mi=stat(84) --0..59
+	local sc=stat(85) --0..61
+	dset(0,yr)
+	dset(1,mo)
+	dset(2,dy)
+	dset(3,hr)
+	dset(4,mi)
+	dset(5,sc)
 	inittitle()
 end
 
