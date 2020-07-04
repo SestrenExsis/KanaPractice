@@ -125,12 +125,14 @@ end
 
 function kana(
 	n,   -- name    : str
+	i,   -- index   : number
 	r,   -- row pos : number
 	c,   -- col pos : number
 	f    -- frames  : table
 	) -- return type: table
 	local res={
 		name=n,
+		index=i,
 		row=r,
 		col=c,
 		frames=f
@@ -141,52 +143,52 @@ end
 
 -- kana info
 _kanatbl={
-a=kana("a",0,0,{0,1,2,3}),
-i=kana("i",0,1,{4,5}),
-u=kana("u",0,2,{6,7}),
-e=kana("e",0,3,{8,9,10,11}),
-o=kana("o",0,4,{12,13,14,15}),
-ka=kana("ka",1,0,{16,17,18}),
-ki=kana("ki",1,1,{19,20,21,22}),
-ku=kana("ku",1,2,{23}),
-ke=kana("ke",1,3,{24,25,26}),
-ko=kana("ko",1,4,{27,28}),
-sa=kana("sa",2,0,{29,30,31}),
-shi=kana("shi",2,1,{32}),
-su=kana("su",2,2,{33,34,35}),
-se=kana("se",2,3,{36,37,38}),
-so=kana("so",2,4,{39,40,41,42}),
-ta=kana("ta",3,0,{43,44,45,46}),
-chi=kana("chi",3,1,{47,48,49}),
-tsu=kana("tsu",3,2,{50}),
-te=kana("te",3,3,{51,52}),
-to=kana("to",3,4,{53,54}),
-na=kana("na",4,0,{55,56,57,58,59}),
-ni=kana("ni",4,1,{60,61,62}),
-nu=kana("nu",4,2,{63,64,65,66}),
-ne=kana("ne",4,3,{67,68,69,70,71}),
-no=kana("no",4,4,{72,73}),
-ha=kana("ha",5,0,{74,75,76,77}),
-hi=kana("hi",5,1,{78,79,80}),
-fu=kana("fu",5,2,{81,82,83,84}),
-he=kana("he",5,3,{85}),
-ho=kana("ho",5,4,{86,87,88,89,90}),
-ma=kana("ma",6,0,{91,92,93,94}),
-mi=kana("mi",6,1,{95,96,97,98}),
-mu=kana("mu",6,2,{99,100,101,102}),
-me=kana("me",6,3,{103,104,105}),
-mo=kana("mo",6,4,{106,107,108}),
-ya=kana("ya",7,0,{109,110,111}),
-yu=kana("yu",7,2,{112,113,114}),
-yo=kana("yo",7,4,{115,116,117}),
-ra=kana("ra",8,0,{118,119,120}),
-ri=kana("ri",8,1,{121,122}),
-ru=kana("ru",8,2,{123,124,125,126}),
-re=kana("re",8,3,{127,128,129,130,131}),
-ro=kana("ro",8,4,{132,133,134}),
-wa=kana("wa",9,0,{135,136,137,138}),
-wo=kana("wo",9,4,{139,140,141,142}),
-n=kana("n",10,0,{143,144})
+a=kana("a",0,0,0,{0,1,2,3}),
+i=kana("i",1,0,1,{4,5}),
+u=kana("u",2,0,2,{6,7}),
+e=kana("e",3,0,3,{8,9,10,11}),
+o=kana("o",4,0,4,{12,13,14,15}),
+ka=kana("ka",5,1,0,{16,17,18}),
+ki=kana("ki",6,1,1,{19,20,21,22}),
+ku=kana("ku",7,1,2,{23}),
+ke=kana("ke",8,1,3,{24,25,26}),
+ko=kana("ko",9,1,4,{27,28}),
+sa=kana("sa",10,2,0,{29,30,31}),
+shi=kana("shi",11,2,1,{32}),
+su=kana("su",12,2,2,{33,34,35}),
+se=kana("se",13,2,3,{36,37,38}),
+so=kana("so",14,2,4,{39,40,41,42}),
+ta=kana("ta",15,3,0,{43,44,45,46}),
+chi=kana("chi",16,3,1,{47,48,49}),
+tsu=kana("tsu",17,3,2,{50}),
+te=kana("te",18,3,3,{51,52}),
+to=kana("to",19,3,4,{53,54}),
+na=kana("na",20,4,0,{55,56,57,58,59}),
+ni=kana("ni",21,4,1,{60,61,62}),
+nu=kana("nu",22,4,2,{63,64,65,66}),
+ne=kana("ne",23,4,3,{67,68,69,70,71}),
+no=kana("no",24,4,4,{72,73}),
+ha=kana("ha",25,5,0,{74,75,76,77}),
+hi=kana("hi",26,5,1,{78,79,80}),
+fu=kana("fu",27,5,2,{81,82,83,84}),
+he=kana("he",28,5,3,{85}),
+ho=kana("ho",29,5,4,{86,87,88,89,90}),
+ma=kana("ma",30,6,0,{91,92,93,94}),
+mi=kana("mi",31,6,1,{95,96,97,98}),
+mu=kana("mu",32,6,2,{99,100,101,102}),
+me=kana("me",33,6,3,{103,104,105}),
+mo=kana("mo",34,6,4,{106,107,108}),
+ya=kana("ya",35,7,0,{109,110,111}),
+yu=kana("yu",36,7,2,{112,113,114}),
+yo=kana("yo",37,7,4,{115,116,117}),
+ra=kana("ra",38,8,0,{118,119,120}),
+ri=kana("ri",39,8,1,{121,122}),
+ru=kana("ru",40,8,2,{123,124,125,126}),
+re=kana("re",41,8,3,{127,128,129,130,131}),
+ro=kana("ro",42,8,4,{132,133,134}),
+wa=kana("wa",43,9,0,{135,136,137,138}),
+wo=kana("wo",44,9,4,{139,140,141,142}),
+n=kana("n",45,10,0,{143,144})
 }
 _kanakey={
 	"a","i","u","e","o",
@@ -238,12 +240,13 @@ function _init()
 	local hr=stat(83) --0..23
 	local mi=stat(84) --0..59
 	local sc=stat(85) --0..61
-	dset(0,yr)
-	dset(1,mo)
-	dset(2,dy)
-	dset(3,hr)
-	dset(4,mi)
-	dset(5,sc)
+	-- memory locations 0-45 are used for kana stats
+	dset(58,yr)
+	dset(59,mo)
+	dset(60,dy)
+	dset(61,hr)
+	dset(62,mi)
+	dset(63,sc)
 	inittitle()
 end
 
@@ -550,6 +553,8 @@ function drawstudy()
 		i=mid(0,i-16,64)
 		drawkana(sk,62,3,8,_c_dry,i)
 		print(sk.name,61,70,6)
+		local val=dget(sk.index)
+		print(val,61,78,6)
 	end
 	cursor(0,114,1)
 	print("press 🅾️ to quit studying")
