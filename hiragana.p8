@@ -248,6 +248,9 @@ function _init()
 	dset(62,mi)
 	dset(63,sc)
 	inittitle()
+	assert(hamming(0x0001)==1)
+	assert(hamming(0x0003)==2)
+	assert(hamming(0x0007)==3)
 end
 
 function initscreen()
@@ -263,6 +266,15 @@ function _draw()
 end
 
 -- helper functions
+
+function hamming(num)
+	local res=0
+	while num>0 do
+		if (num%2==1) res+=1
+		num=flr(num/2)
+	end
+	return res
+end
 
 function betweens(pt0,pt1)
 	local x0=flr(pt0.x)
@@ -534,11 +546,15 @@ function drawstudy()
 	for n,k in pairs(_kanatbl) do
 		local x=(1.5*s*8)*k.col
 		local y=(1.3*s*8)*k.row
+		local m=dget(k.index)
+		local w=hamming(m)
 		local bc=0
 		local fc=5
-		local m=dget(k.index)
-		if (m==3) fc=3
-		if (m==2) fc=8
+		if (w>=  1) fc=8
+		if (w>=  3) fc=9
+		if (w>=  6) fc=10
+		if (w>= 10) fc=11
+		if (w>= 15) fc=3
 		if k.col==cx and k.row==cy then
 			bc=fc
 			fc=7
@@ -559,10 +575,7 @@ function drawstudy()
 		drawkana(sk,62,3,8,_c_dry,i)
 		print(sk.name,61,70,6)
 		local m=dget(sk.index)
-		local v="---"
-		if (m==3) v="⬆️★"
-		if (m==2) v="⬇️😐"
-		print(v,61,78,6)
+		print(tostr(m,true),61,78,6)
 	end
 	cursor(0,114,1)
 	print("press 🅾️ to quit studying")
@@ -600,17 +613,23 @@ function updateread()
 			_state="check"
 		end
 	elseif _state=="check" then
+		local guess = -1
 		if btnp(⬆️) then
 			-- you got it right
-			dset(_kana.index,3)
+			guess = 1
 			_state="stats"
 			_guesses+=1
 		elseif btnp(⬇️) then
 			-- you got it wrong
-			dset(_kana.index,2)
+			guess = 0
 			_state="stats"
 			_errors+=1
 			_guesses+=1
+		end
+		if guess>=0 then
+			local g=dget(_kana.index)
+			g=max(1,(g<<1)+guess)
+			dset(_kana.index,g)
 		end
 	elseif _state=="stats" then
 		if btnp(❎) then
