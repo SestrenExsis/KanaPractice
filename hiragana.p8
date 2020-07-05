@@ -534,13 +534,18 @@ function drawstudy()
 	for n,k in pairs(_kanatbl) do
 		local x=(1.5*s*8)*k.col
 		local y=(1.3*s*8)*k.row
-		local c=1
+		local bc=0
+		local fc=5
+		local m=dget(k.index)
+		if (m==3) fc=3
+		if (m==2) fc=8
 		if k.col==cx and k.row==cy then
-			c=7
+			bc=fc
+			fc=7
 			sk=k
-			rectfill(x,y,x+7,y+7,1)
+			rectfill(x,y,x+7,y+7,bc)
 		end
-		drawkana(k,x,y,s,c)
+		drawkana(k,x,y,s,fc)
 	end
 	if sk==nil then
 		x=(1.5*s*8)*cx
@@ -553,8 +558,11 @@ function drawstudy()
 		i=mid(0,i-16,64)
 		drawkana(sk,62,3,8,_c_dry,i)
 		print(sk.name,61,70,6)
-		local val=dget(sk.index)
-		print(val,61,78,6)
+		local m=dget(sk.index)
+		local v="---"
+		if (m==3) v="⬆️★"
+		if (m==2) v="⬇️😐"
+		print(v,61,78,6)
 	end
 	cursor(0,114,1)
 	print("press 🅾️ to quit studying")
@@ -594,10 +602,12 @@ function updateread()
 	elseif _state=="check" then
 		if btnp(⬆️) then
 			-- you got it right
+			dset(_kana.index,3)
 			_state="stats"
 			_guesses+=1
 		elseif btnp(⬇️) then
 			-- you got it wrong
+			dset(_kana.index,2)
 			_state="stats"
 			_errors+=1
 			_guesses+=1
