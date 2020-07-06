@@ -230,10 +230,12 @@ function brush(
 		vel=velocity,
 		lpos=lastpos,
 		r=0,
-		on=false
+		on=false,
+		new=false
 	}
-	-- r  : brush radius
-	-- on : using brush
+	-- r   : brush radius
+	-- on  : using brush
+	-- new : new use of brush
 	return res
 end
 
@@ -730,22 +732,22 @@ function updatewriteguess()
 	end
 	if _mous then
 		poke(0x5f2d,1)
-		_brush.press=_brush.on
+		_brush.new=_brush.on
 		_brush.on=btn(❎) or stat(34)==1
 		_brush.pos.x=stat(32)
 		_brush.pos.y=stat(33)
 		_brush.vel.x=_brush.pos.x-_brush.lpos.x
 		_brush.vel.y=_brush.pos.y-_brush.lpos.y
 	else
-		_brush.press=_brush.on
+		_brush.new=_brush.on
 		_brush.on=btn(❎)
 		if (btn(⬆️)) _brush.vel.y-=_accl
 		if (btn(⬇️)) _brush.vel.y+=_accl
 		if (btn(⬅️)) _brush.vel.x-=_accl
 		if (btn(➡️)) _brush.vel.x+=_accl
 	end
-	if _brush.press and _brush.on then
-		_brush.press=false
+	if _brush.new and _brush.on then
+		_brush.new=false
 	end
 	local applydrag=not _mous
 	-- update pen physics
@@ -777,7 +779,7 @@ function updatewriteguess()
 	_brush.pos.x=mid(0,_brush.pos.x,127)
 	_brush.pos.y=mid(0,_brush.pos.y,127)
 	-- update ink effects
-	if (_brush.press) add(_inks,{})
+	if (_brush.new) add(_inks,{})
 	if _brush.on then
 		_brush.r+=_pool
 	else
