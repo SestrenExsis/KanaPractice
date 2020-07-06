@@ -124,11 +124,11 @@ function getstrokes(k)
 end
 
 function kana(
-	n,   -- name    : str
-	i,   -- index   : number
-	r,   -- row pos : number
-	c,   -- col pos : number
-	f    -- frames  : table
+	n, -- name    : str
+	i, -- index   : number
+	r, -- row pos : number
+	c, -- col pos : number
+	f  -- frames  : table
 	) -- return type: table
 	local res={
 		name=n,
@@ -219,8 +219,8 @@ _fills={
 }
 
 function brush(
-	x,   -- x pos   : number
-	y    -- y pos   : number
+	x, -- x pos   : number
+	y  -- y pos   : number
 	) -- return type: table
 	local position=point(x,y)
 	local velocity=point(0,0)
@@ -237,6 +237,47 @@ function brush(
 	-- on  : using brush
 	-- new : new use of brush
 	return res
+end
+
+function brushphysics(
+	b,   -- brush : brush
+	drag -- should move be slowed
+) -- return type: nil
+	if b.vel.x>0 then
+		b.vel.x-=_drag
+		b.vel.x=max(0,b.vel.x)
+	else
+		b.vel.x+=_drag
+		b.vel.x=min(0,b.vel.x)
+	end
+	if b.vel.y>0 then
+		b.vel.y-=_drag
+		b.vel.y=max(0,b.vel.y)
+	else
+		b.vel.y+=_drag
+		b.vel.y=min(0,b.vel.y)
+	end
+	if drag then
+		local multi=1.000
+		if (b.on) multi=_pull
+		if (b.vel.x~=0) then
+			b.pos.x+=multi*b.vel.x
+		end
+		if (_brush.vel.y~=0) then
+			b.pos.y+=multi*b.vel.y
+		end
+	end
+	-- keep pen in bounds
+	b.pos.x=mid(0,b.pos.x,127)
+	b.pos.y=mid(0,b.pos.y,127)
+	-- update ink effects
+	if (b.new) add(_inks,{})
+	if b.on then
+		b.r+=_pool
+	else
+		b.r-=_pool
+	end
+	b.r=mid(0,b.r,_maxr)
 end
 
 function inkdrop(
@@ -749,46 +790,12 @@ function updatewriteguess()
 	if _brush.new and _brush.on then
 		_brush.new=false
 	end
-	local applydrag=not _mous
-	-- update pen physics
-	if _brush.vel.x>0 then
-		_brush.vel.x-=_drag
-		_brush.vel.x=max(0,_brush.vel.x)
-	else
-		_brush.vel.x+=_drag
-		_brush.vel.x=min(0,_brush.vel.x)
-	end
-	if _brush.vel.y>0 then
-		_brush.vel.y-=_drag
-		_brush.vel.y=max(0,_brush.vel.y)
-	else
-		_brush.vel.y+=_drag
-		_brush.vel.y=min(0,_brush.vel.y)
-	end
-	if applydrag then
-		local multi=1.000
-		if (_brush.on) multi=_pull
-		if (_brush.vel.x~=0) then
-			_brush.pos.x+=multi*_brush.vel.x
-		end
-		if (_brush.vel.y~=0) then
-			_brush.pos.y+=multi*_brush.vel.y
-		end
-	end
-	-- keep pen in bounds
-	_brush.pos.x=mid(0,_brush.pos.x,127)
-	_brush.pos.y=mid(0,_brush.pos.y,127)
-	-- update ink effects
-	if (_brush.new) add(_inks,{})
-	if _brush.on then
-		_brush.r+=_pool
-	else
-		_brush.r-=_pool
-	end
-	_brush.r=mid(0,_brush.r,_maxr)
-	local l=point(_brush.lpos.x,_brush.lpos.y)
-	local p=point(_brush.pos.x,_brush.pos.y)
-	local pts=betweens(l,p)
+	local drag=not _mous
+	brushphysics(_brush,drag)
+	local pts=betweens(
+		_brush.lpos,
+		_brush.pos
+	)
 	if _brush.r>0 then
 		for pt in all(pts) do
 			local ink=inkdrop(pt,_brush.r)
