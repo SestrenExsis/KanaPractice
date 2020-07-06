@@ -218,6 +218,25 @@ _fills={
 	0b0000000000000000
 }
 
+function brush(
+	x,   -- x pos   : number
+	y    -- y pos   : number
+	) -- return type: table
+	local position=point(x,y)
+	local velocity=point(0,0)
+	local lastpos=point(x,y)
+	local res={
+		pos=position,
+		vel=velocity,
+		lpos=lastpos,
+		r=0,
+		on=false
+	}
+	-- r  : brush radius
+	-- on : using brush
+	return res
+end
+
 function inkdrop(
 	position,
 	amount
@@ -673,15 +692,6 @@ end
 -- * check : show stroke order
 -- * stats : show stats
 
--- px : x position
--- py : y position
--- vx : x velocity
--- vy : y velocity
--- lx : last x pos
--- ly : last y pos
--- sz : brush radius
--- on : using brush
-
 function initwrite()
 	_debug={
 		screen="write"
@@ -697,15 +707,7 @@ function initwrite()
 end
 
 function nextwrite()
-	_nib_px=64
-	_nib_py=6
-	_nib_vx=0
-	_nib_vy=0
-	_nib_lx=64
-	_nib_ly=64
-	_nib_sz=0
-	_nib_on=false
-	_nib_pr=false
+	_brush=brush(64,64)
 	_lines=0
 	local i=flr(rnd(#_kanakey))+1
 	_kana=_kanatbl[_kanakey[i]]
@@ -715,8 +717,8 @@ function nextwrite()
 end
 
 function updatewriteguess()
-	_nib_lx=_nib_px
-	_nib_ly=_nib_py
+	_brush.lpos.x=_brush.pos.x
+	_brush.lpos.y=_brush.pos.y
 	-- get input
 	if btnp(🅾️,1) then
 		_mous=not _mous
@@ -728,65 +730,66 @@ function updatewriteguess()
 	end
 	if _mous then
 		poke(0x5f2d,1)
-		_nib_pr=_nib_on
-		_nib_on=btn(❎) or stat(34)==1
-		_nib_px=stat(32)
-		_nib_py=stat(33)
-		_nib_vx=_nib_px-_nib_lx
-		_nib_vy=_nib_py-_nib_ly
+		_brush.press=_brush.on
+		_brush.on=btn(❎) or stat(34)==1
+		_brush.pos.x=stat(32)
+		_brush.pos.y=stat(33)
+		_brush.vel.x=_brush.pos.x-_brush.lpos.x
+		_brush.vel.y=_brush.pos.y-_brush.lpos.y
 	else
-		_nib_pr=_nib_on
-		_nib_on=btn(❎)
-		if (btn(⬆️)) _nib_vy-=_accl
-		if (btn(⬇️)) _nib_vy+=_accl
-		if (btn(⬅️)) _nib_vx-=_accl
-		if (btn(➡️)) _nib_vx+=_accl
+		_brush.press=_brush.on
+		_brush.on=btn(❎)
+		if (btn(⬆️)) _brush.vel.y-=_accl
+		if (btn(⬇️)) _brush.vel.y+=_accl
+		if (btn(⬅️)) _brush.vel.x-=_accl
+		if (btn(➡️)) _brush.vel.x+=_accl
 	end
-	if _nib_pr and _nib_on then
-		_nib_pr=false
+	if _brush.press and _brush.on then
+		_brush.press=false
 	end
+	local applydrag=not _mous
 	-- update pen physics
-	if _nib_vx>0 then
-		_nib_vx-=_drag
-		_nib_vx=max(0,_nib_vx)
+	if _brush.vel.x>0 then
+		_brush.vel.x-=_drag
+		_brush.vel.x=max(0,_brush.vel.x)
 	else
-		_nib_vx+=_drag
-		_nib_vx=min(0,_nib_vx)
+		_brush.vel.x+=_drag
+		_brush.vel.x=min(0,_brush.vel.x)
 	end
-	if _nib_vy>0 then
-		_nib_vy-=_drag
-		_nib_vy=max(0,_nib_vy)
+	if _brush.vel.y>0 then
+		_brush.vel.y-=_drag
+		_brush.vel.y=max(0,_brush.vel.y)
 	else
-		_nib_vy+=_drag
-		_nib_vy=min(0,_nib_vy)
+		_brush.vel.y+=_drag
+		_brush.vel.y=min(0,_brush.vel.y)
 	end
-	if (not _mous) then
+	if applydrag then
 		local multi=1.000
-		if (_nib_on) multi=_pull
-		if (_nib_vx~=0) then
-			_nib_px+=multi*_nib_vx
+		if (_brush.on) multi=_pull
+		if (_brush.vel.x~=0) then
+			_brush.pos.x+=multi*_brush.vel.x
 		end
-		if (_nib_vy~=0) then
-			_nib_py+=multi*_nib_vy
+		if (_brush.vel.y~=0) then
+			_brush.pos.y+=multi*_brush.vel.y
 		end
 	end
 	-- keep pen in bounds
-	_nib_px=mid(0,_nib_px,127)
-	_nib_py=mid(0,_nib_py,127)
+	_brush.pos.x=mid(0,_brush.pos.x,127)
+	_brush.pos.y=mid(0,_brush.pos.y,127)
 	-- update ink effects
-	if (_nib_pr) add(_inks,{})
-	if _nib_on then
-		_nib_sz+=_pool
+	if (_brush.press) add(_inks,{})
+	if _brush.on then
+		_brush.r+=_pool
 	else
-		_nib_sz-=_pool
+		_brush.r-=_pool
 	end
-	_nib_sz=mid(0,_nib_sz,_maxr)
-	local l=point(_nib_lx,_nib_ly)
-	local p=point(_nib_px,_nib_py)
+	_brush.r=mid(0,_brush.r,_maxr)
+	local l=point(_brush.lpos.x,_brush.lpos.y)
+	local p=point(_brush.pos.x,_brush.pos.y)
 	local pts=betweens(l,p)
-	if _nib_sz>0 then
+	if _brush.r>0 then
 		for pt in all(pts) do
-			local ink=inkdrop(pt,_nib_sz)
+			local ink=inkdrop(pt,_brush.r)
 			add(_inks[#_inks],ink)
 		end
 	end
@@ -860,8 +863,8 @@ function drawwrite()
 	end
 		fillp()
 		circfill(
-			_nib_px,_nib_py,
-	 	max(1,_nib_sz),_c_nib
+			_brush.pos.x,_brush.pos.y,
+	 	max(1,_brush.r),_c_nib
 		)
 	print(k.name,3,3,1)
 	print(#_inks-1,112,0,1)
