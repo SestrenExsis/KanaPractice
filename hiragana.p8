@@ -14,14 +14,9 @@ __lua__
 -- description:
 -- * ink drying
 
--- modes:
--- * guided learning
--- * quiz
-
 -- quiz mode:
 -- * choose a random kana
 -- * ask the player to draw it
--- * stroke order matters
 -->8
 -- constants and constructors
 
@@ -243,6 +238,9 @@ function brushphysics(
 	b,   -- brush : brush
 	drag -- should move be slowed
 ) -- return type: nil
+	if b.new and b.on then
+		b.new=false
+	end
 	if b.vel.x>0 then
 		b.vel.x-=_drag
 		b.vel.x=max(0,b.vel.x)
@@ -271,7 +269,6 @@ function brushphysics(
 	b.pos.x=mid(0,b.pos.x,127)
 	b.pos.y=mid(0,b.pos.y,127)
 	-- update ink effects
-	if (b.new) add(_inks,{})
 	if b.on then
 		b.r+=_pool
 	else
@@ -582,8 +579,6 @@ function initstudy()
 	initfn=initstudy
 	updatefn=updatestudy
 	drawfn=drawstudy
-	--palt(0,false)
-	--palt(7,true)
 	_cursor=point(0,0)
 	_cols=5
 	_rows=11
@@ -787,11 +782,9 @@ function updatewriteguess()
 		if (btn(⬅️)) _brush.vel.x-=_accl
 		if (btn(➡️)) _brush.vel.x+=_accl
 	end
-	if _brush.new and _brush.on then
-		_brush.new=false
-	end
 	local drag=not _mous
 	brushphysics(_brush,drag)
+	if (_brush.new) add(_inks,{})
 	local pts=betweens(
 		_brush.lpos,
 		_brush.pos
