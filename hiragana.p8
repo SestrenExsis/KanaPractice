@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 27
+version 29
 __lua__
 -- hiragana
 -- by sestrenexsis
@@ -226,21 +226,23 @@ function brush(
 		lpos=lastpos,
 		r=0,
 		on=false,
-		new=false
+		lon=false,
+		press=function(self)
+			local res=self.on and not self.lon
+			return res
+		end
 	}
-	-- r   : brush radius
-	-- on  : using brush
-	-- new : new use of brush
+	-- r     : brush radius
+	-- on    : using brush
+	-- lon   : last using brush
+	-- press : brush was just pressed
 	return res
 end
 
 function brushphysics(
 	b,   -- brush : brush
 	drag -- should move be slowed
-) -- return type: nil
-	if b.new and b.on then
-		b.new=false
-	end
+	) -- return type: nil
 	if b.vel.x>0 then
 		b.vel.x-=_drag
 		b.vel.x=max(0,b.vel.x)
@@ -275,12 +277,13 @@ function brushphysics(
 		b.r-=_pool
 	end
 	b.r=mid(0,b.r,_maxr)
+	b.lon=b.on
 end
 
 function inkdrop(
 	position,
 	amount
-)
+	)
 	local res={
 		pos=position,
 		amt=amount,
@@ -390,6 +393,8 @@ function drawkana(
 	if (c==nil) c=_c_cut
 	if (i==nil) i=64
 	for pts in all(k.strokes) do
+		local pt0=nil
+		local pt1=nil
 		for pt in all(pts) do
 			i-=1
 			if (i<=0) break
@@ -400,8 +405,22 @@ function drawkana(
 				local lft=x+s*pt.x
 				local btm=top+s-1
 				local rgt=lft+s-1
-				rectfill(lft,top,rgt,btm,c)
+				pt1=point(lft,top)
+				if _smooth==nil or not _smooth then
+					rectfill(lft,top,rgt,btm,c)
+				end
+				if pt0~=nil and _smooth ~=nil and _smooth then
+					local ps=betweens(pt0,pt1)
+					for p in all(ps) do
+						top=p.y+1
+						lft=p.x+1
+						btm=top+s-4
+						rgt=lft+s-4
+						rectfill(lft,top,rgt,btm,c)
+					end
+				end
 			end
+			pt0=pt1
 		end
 		i-=5
 		if (i<=0) break
@@ -582,6 +601,7 @@ function initstudy()
 	_cursor=point(0,0)
 	_cols=5
 	_rows=11
+	_smooth=true
 end
 
 function updatestudy()
@@ -592,6 +612,7 @@ function updatestudy()
 	_cursor.x=_cursor.x%_cols
 	_cursor.y=_cursor.y%_rows
 	if (btnp(🅾️)) initmenu()
+	if (btnp(❎)) _smooth=not _smooth
 end
 
 function drawstudy()
@@ -768,23 +789,21 @@ function updatewriteguess()
 	end
 	if _mous then
 		poke(0x5f2d,1)
-		_brush.new=_brush.on
 		_brush.on=btn(❎) or stat(34)==1
 		_brush.pos.x=stat(32)
 		_brush.pos.y=stat(33)
 		_brush.vel.x=_brush.pos.x-_brush.lpos.x
 		_brush.vel.y=_brush.pos.y-_brush.lpos.y
 	else
-		_brush.new=_brush.on
 		_brush.on=btn(❎)
 		if (btn(⬆️)) _brush.vel.y-=_accl
 		if (btn(⬇️)) _brush.vel.y+=_accl
 		if (btn(⬅️)) _brush.vel.x-=_accl
 		if (btn(➡️)) _brush.vel.x+=_accl
 	end
+	if (_brush:press()) add(_inks,{})
 	local drag=not _mous
 	brushphysics(_brush,drag)
-	if (_brush.new) add(_inks,{})
 	local pts=betweens(
 		_brush.lpos,
 		_brush.pos
