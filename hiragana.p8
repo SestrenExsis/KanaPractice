@@ -28,6 +28,8 @@ __lua__
 -- maxw : max wetness of ink
 -- dryt : time to finish drying
 
+_hint=true --enable stroke hinting
+
 _accl=0.175
 _drag=0.100
 _pull=0.650
@@ -406,16 +408,16 @@ function drawkana(
 				local btm=top+s-1
 				local rgt=lft+s-1
 				pt1=point(lft,top)
-				if _smooth==nil or not _smooth then
+				if not _hint then
 					rectfill(lft,top,rgt,btm,c)
 				end
-				if pt0~=nil and _smooth ~=nil and _smooth then
+				if pt0~=nil and _hint then
 					local ps=betweens(pt0,pt1)
 					for p in all(ps) do
-						top=p.y+1
-						lft=p.x+1
-						btm=top+s-4
-						rgt=lft+s-4
+						top=p.y+0.25*s
+						lft=p.x+0.25*s
+						btm=top+0.5*s
+						rgt=lft+0.5*s
 						rectfill(lft,top,rgt,btm,c)
 					end
 				end
@@ -426,91 +428,6 @@ function drawkana(
 		if (i<=0) break
 	end
 	local res=(i>0)
-	return res
-end
-
-function testinks(
-	x,y, -- upper left corner
-	s    -- scale in pixels
-	) -- return type: table
-	local res={}
-	for inks in all(_inks) do
-		local stroke={}
-		local lx=-1
-		local ly=-1
-		for ink in all(inks) do
-			local cx=flr((ink.pos.x-x)/s)
-			local cy=flr((ink.pos.y-y)/s)
-			if cx!=lx or cy!=ly then
-				add(stroke,point(cx,cy))
-			end
-			lx=cx
-			ly=cy
-		end
-		add(res,stroke)
-	end
-	return res
-end
-
-function evaluate(src,trg)
-	local tot=0
-	local pts={}
-	for i=1,#trg do
-		local pt=trg[i]
-		local index=8*pt.y+pt.x
-		pts[index]=1
-		tot+=1
-	end
-	local err=tot
-	for i=1,#src do
-		local pt=src[i]
-		local index=8*pt.y+pt.x
-		if pts[index]==nil then
-			err+=1
-		elseif pts[index]==1 then
-			err-=1
-			pts[index]=0
-		end
-	end
-	local res=err
-	return res
-end
-
-function evaluateall(src,trg)
-	local evals={}
-	local minst=min(#src,#trg)
-	local maxst=max(#src,#trg)
-	if 1<=minst then
-		for i=1,minst do
-			local tot=max(#src[i],#trg[i])
-			local err=evaluate(src[i],trg[i])
-			local eval={tot,err}
-			add(evals,eval)
-		end
-	end
-	if minst+1<=maxst then
-		for i=minst+1,maxst do
-			local tot=0
-			local err=0
-			if #src>=i then
-				tot=#src[i]
-				err=#src[i]
-			end
-			if #trg>=i then
-				tot=min(tot,#trg[i])
-				err=max(err,#trg[i])
-			end
-			local eval={tot,err}
-			add(evals,eval)
-		end
-	end
-	local tot=0
-	local err=0
-	for i=1,#evals do
-		tot+=evals[i][1]
-		err+=evals[i][2]
-	end
-	local res=evals
 	return res
 end
 
@@ -601,7 +518,6 @@ function initstudy()
 	_cursor=point(0,0)
 	_cols=5
 	_rows=11
-	_smooth=true
 end
 
 function updatestudy()
@@ -612,7 +528,6 @@ function updatestudy()
 	_cursor.x=_cursor.x%_cols
 	_cursor.y=_cursor.y%_rows
 	if (btnp(🅾️)) initmenu()
-	if (btnp(❎)) _smooth=not _smooth
 end
 
 function drawstudy()
@@ -691,15 +606,15 @@ function updateread()
 			_state="check"
 		end
 	elseif _state=="check" then
-		local guess = -1
+		local guess=-1
 		if btnp(⬆️) then
 			-- you got it right
-			guess = 1
+			guess=1
 			_state="stats"
 			_guesses+=1
 		elseif btnp(⬇️) then
 			-- you got it wrong
-			guess = 0
+			guess=0
 			_state="stats"
 			_errors+=1
 			_guesses+=1
