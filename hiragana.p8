@@ -331,6 +331,88 @@ end
 
 -- helper functions
 
+-- the demem() and enmem() 
+-- functions are for compactly
+-- storing data about the 6
+-- most recent read attempts and
+-- 6 most recent write attempts
+-- in local storage for a single
+-- kana
+
+-- the portion before the 
+-- decimal stores data about 
+-- read attempts
+
+-- the portion after the
+-- decimal stores data about
+-- write attempts
+
+-- the position of the leading 
+-- 1 determines number of 
+-- attempts (max 6)
+
+-- the number of 0s after the 
+-- leading 1 determines how 
+-- many errors have been made 
+-- (max 6)
+
+function demem(
+	v  -- value       : number
+	)  -- return type : table
+	-- create write history
+	local wtbl={}
+	local wval=v%0xff
+	while wval>0 do
+		add(wtbl,wval%1)
+		wval=flr(wval>>1)
+	end
+	deli(wtbl,#wtbl)
+	-- create read history
+	local rtbl={}
+	local rval=flr(v/0xff)
+	while rval>0 do
+		add(rtbl,rval%1)
+		rval=flr(rval>>1)
+	end
+	deli(rtbl,#rtbl)
+	local res={
+		w=wtbl, -- write attempts
+		r=rtbl  -- read attempts
+	}
+	return res
+end
+
+function enmem(
+	w, -- write attempts : table
+	r  -- read attempts  : table
+	)  -- return type : number
+	local res=0
+	for i=1,min(6,#w) do
+		local v=w[i]*(2^(i-1))
+		res+=v*0x0100
+	end
+	res+=0x0100*2^#w
+	for i=1,min(6,#r) do
+		local v=r[i]*(2^(i-1))
+		res+=v*0x0001
+	end
+	res+=0x0001*2^#r
+	return res
+end
+
+local testval=enmem(
+	{0,1,0,1,0},
+	{1,1,1,1,1,1}
+)
+print(tostr(testval,true))
+assert(testval==0x2a7f)
+testval=enmem(
+	{1},
+	{1,0,1,1}
+)
+print(tostr(testval,true))
+assert(testval==0x031d)
+
 function hamming(num)
 	local res=0
 	while num>0 do
