@@ -17,6 +17,98 @@ __lua__
 -- quiz mode:
 -- * choose a random kana
 -- * ask the player to draw it
+
+cartdata("sestrenexsis_hiragana_0")
+
+-- the demem() and enmem() 
+-- functions are for compactly
+-- storing data about the 6
+-- most recent read attempts and
+-- 6 most recent write attempts
+-- in local storage for a single
+-- kana
+
+-- the portion before the 
+-- decimal stores data about 
+-- read attempts
+
+-- the portion after the
+-- decimal stores data about
+-- write attempts
+
+-- the position of the leading 
+-- 1 determines number of 
+-- attempts (max 6)
+
+-- the number of 0s after the 
+-- leading 1 determines how 
+-- many errors have been made 
+-- (max 6)
+
+function demem(
+	v  -- value       : number
+	)  -- return type : table
+	-- create write history
+	local wtbl={}
+	local wval=flr(v/0x0100)
+	while wval>0 do
+		add(wtbl,wval%2)
+		wval=flr(wval>>1)
+	end
+	deli(wtbl,#wtbl)
+	-- create read history
+	local rtbl={}
+	local rval=v%0x0100
+	while rval>0 do
+		add(rtbl,rval%2)
+		rval=flr(rval>>1)
+	end
+	deli(rtbl,#rtbl)
+	local res={
+		w=wtbl, -- write attempts
+		r=rtbl  -- read attempts
+	}
+	return res
+end
+
+function enmem(
+	w, -- write attempts : table
+	r  -- read attempts  : table
+	)  -- return type : number
+	local res=0
+	for i=1,min(6,#w) do
+		local v=w[i]*(2^(i-1))
+		res+=v*0x0100
+	end
+	res+=0x0100*2^#w
+	for i=1,min(6,#r) do
+		local v=r[i]*(2^(i-1))
+		res+=v*0x0001
+	end
+	res+=0x0001*2^#r
+	return res
+end
+
+function testmem(v,w,r)
+	assert(enmem(w,r)==v)
+	local tbl=demem(v)
+	--print(#tbl.w.." "..#w)
+	assert(#tbl.w==#w)
+	for i=1,#tbl.w do
+		--print(tbl.w[i].." "..w[i])
+		assert(tbl.w[i]==w[i])
+	end
+	--print(#tbl.r.." "..#r)
+	assert(#tbl.r==#r)
+	for i=1,#tbl.r do
+		--print(tbl.r[i].." "..r[i])
+		assert(tbl.r[i]==r[i])
+	end
+end
+
+testmem(0x2a7f,{0,1,0,1,0},{1,1,1,1,1,1})
+testmem(0x031d,{1},{1,0,1,1})
+testmem(0x1a2e,{0,1,0,1},{0,1,1,1,0})
 -->8
 -- constants and constructors
 
@@ -127,12 +219,15 @@ function kana(
 	c, -- col pos : number
 	f  -- frames  : table
 	) -- return type: table
+	local rw=demem(dget(i))
 	local res={
 		name=n,
 		index=i,
 		row=r,
 		col=c,
-		frames=f
+		frames=f,
+		reads=rw.r,
+		writes=rw.w
 	}
 	res.strokes=getstrokes(res)
 	return res
@@ -297,7 +392,6 @@ end
 -- main functions
 
 function _init()
-	cartdata("sestrenexsis_hiragana_0")
 	local yr=stat(80) --4-digit
 	local mo=stat(81) --1..12
 	local dy=stat(82) --1..31
@@ -331,101 +425,19 @@ end
 
 -- helper functions
 
--- the demem() and enmem() 
--- functions are for compactly
--- storing data about the 6
--- most recent read attempts and
--- 6 most recent write attempts
--- in local storage for a single
--- kana
-
--- the portion before the 
--- decimal stores data about 
--- read attempts
-
--- the portion after the
--- decimal stores data about
--- write attempts
-
--- the position of the leading 
--- 1 determines number of 
--- attempts (max 6)
-
--- the number of 0s after the 
--- leading 1 determines how 
--- many errors have been made 
--- (max 6)
-
-function demem(
-	v  -- value       : number
-	)  -- return type : table
-	-- create write history
-	local wtbl={}
-	local wval=flr(v/0x0100)
-	while wval>0 do
-		add(wtbl,wval%2)
-		wval=flr(wval>>1)
-	end
-	deli(wtbl,#wtbl)
-	-- create read history
-	local rtbl={}
-	local rval=v%0x0100
-	while rval>0 do
-		add(rtbl,rval%2)
-		rval=flr(rval>>1)
-	end
-	deli(rtbl,#rtbl)
-	local res={
-		w=wtbl, -- write attempts
-		r=rtbl  -- read attempts
-	}
-	return res
-end
-
-function enmem(
-	w, -- write attempts : table
-	r  -- read attempts  : table
-	)  -- return type : number
-	local res=0
-	for i=1,min(6,#w) do
-		local v=w[i]*(2^(i-1))
-		res+=v*0x0100
-	end
-	res+=0x0100*2^#w
-	for i=1,min(6,#r) do
-		local v=r[i]*(2^(i-1))
-		res+=v*0x0001
-	end
-	res+=0x0001*2^#r
-	return res
-end
-
-function testmem(v,w,r)
-	assert(enmem(w,r)==v)
-	local tbl=demem(v)
-	print(#tbl.w.." "..#w)
-	assert(#tbl.w==#w)
-	for i=1,#tbl.w do
-		print(tbl.w[i].." "..w[i])
-		assert(tbl.w[i]==w[i])
-	end
-	print(#tbl.r.." "..#r)
-	assert(#tbl.r==#r)
-	for i=1,#tbl.r do
-		print(tbl.r[i].." "..r[i])
-		assert(tbl.r[i]==r[i])
-	end
-end
-
-testmem(0x2a7f,{0,1,0,1,0},{1,1,1,1,1,1})
-testmem(0x031d,{1},{1,0,1,1})
-testmem(0x1a2e,{0,1,0,1},{0,1,1,1,0})
-
 function hamming(num)
 	local res=0
 	while num>0 do
 		if (num%2==1) res+=1
 		num=flr(num/2)
+	end
+	return res
+end
+
+function sum(tbl)
+	local res=0
+	for num in all(tbl) do
+		res+=num
 	end
 	return res
 end
@@ -629,15 +641,14 @@ function drawstudy()
 	for n,k in pairs(_kanatbl) do
 		local x=(1.5*s*8)*k.col
 		local y=(1.3*s*8)*k.row
-		local m=dget(k.index)
-		local w=hamming(m)
+		local w=sum(k.reads)
 		local bc=0
 		local fc=5
-		if (w>=  1) fc=8
-		if (w>=  3) fc=9
-		if (w>=  6) fc=10
-		if (w>= 10) fc=11
-		if (w>= 15) fc=3
+		if (#k.reads>0) fc=8
+		if (w>= 1) fc=9  -- 3
+		if (w>= 2) fc=10 -- 6
+		if (w>= 3) fc=11 --10
+		if (w>= 4) fc=3  --15
 		if k.col==cx and k.row==cy then
 			bc=fc
 			fc=7
@@ -684,7 +695,8 @@ function initread()
 end
 
 function nextread()
-	local i=flr(rnd(#_kanakey))+1
+	--local i=flr(rnd(#_kanakey))+1
+	local i=flr(rnd(5))+1
 	_kana=_kanatbl[_kanakey[i]]
 	_state="guess"
 end
@@ -710,9 +722,13 @@ function updateread()
 			_guesses+=1
 		end
 		if guess>=0 then
-			local g=dget(_kana.index)
-			g=max(1,(g<<1)+guess)
-			dset(_kana.index,g)
+			local m=dget(_kana.index)
+			local rw=demem(m)
+			add(rw.r,guess,1)
+			if (#rw.r>6) del(rw.r)
+			_kana.reads=rw.r
+			m=enmem(rw.r,rw.w)
+			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
 		if btnp(❎) then
