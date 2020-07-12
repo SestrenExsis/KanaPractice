@@ -361,17 +361,17 @@ function demem(
 	)  -- return type : table
 	-- create write history
 	local wtbl={}
-	local wval=v%0xff
+	local wval=flr(v/0x0100)
 	while wval>0 do
-		add(wtbl,wval%1)
+		add(wtbl,wval%2)
 		wval=flr(wval>>1)
 	end
 	deli(wtbl,#wtbl)
 	-- create read history
 	local rtbl={}
-	local rval=flr(v/0xff)
+	local rval=v%0x0100
 	while rval>0 do
-		add(rtbl,rval%1)
+		add(rtbl,rval%2)
 		rval=flr(rval>>1)
 	end
 	deli(rtbl,#rtbl)
@@ -400,18 +400,26 @@ function enmem(
 	return res
 end
 
-local testval=enmem(
-	{0,1,0,1,0},
-	{1,1,1,1,1,1}
-)
-print(tostr(testval,true))
-assert(testval==0x2a7f)
-testval=enmem(
-	{1},
-	{1,0,1,1}
-)
-print(tostr(testval,true))
-assert(testval==0x031d)
+function testmem(v,w,r)
+	assert(enmem(w,r)==v)
+	local tbl=demem(v)
+	print(#tbl.w.." "..#w)
+	assert(#tbl.w==#w)
+	for i=1,#tbl.w do
+		print(tbl.w[i].." "..w[i])
+		assert(tbl.w[i]==w[i])
+	end
+	print(#tbl.r.." "..#r)
+	assert(#tbl.r==#r)
+	for i=1,#tbl.r do
+		print(tbl.r[i].." "..r[i])
+		assert(tbl.r[i]==r[i])
+	end
+end
+
+testmem(0x2a7f,{0,1,0,1,0},{1,1,1,1,1,1})
+testmem(0x031d,{1},{1,0,1,1})
+testmem(0x1a2e,{0,1,0,1},{0,1,1,1,0})
 
 function hamming(num)
 	local res=0
