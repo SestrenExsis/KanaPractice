@@ -670,6 +670,15 @@ function drawstudy()
 		print(sk.name,61,70,6)
 		local m=dget(sk.index)
 		print(tostr(m,true),61,78,6)
+		local mt=demem(m)
+		print("r",61,86,12)
+		for i=1,#mt.r do
+			print(mt.r[i],61+8*i,86,6)
+		end
+		print("w",61,94,12)
+		for i=1,#mt.w do
+			print(mt.w[i],61+8*i,94,6)
+		end
 	end
 	cursor(0,114,1)
 	print("press 🅾️ to quit studying")
@@ -695,8 +704,8 @@ function initread()
 end
 
 function nextread()
-	--local i=flr(rnd(#_kanakey))+1
-	local i=flr(rnd(5))+1
+	local i=flr(rnd(#_kanakey))+1
+	--local i=flr(rnd(5))+1
 	_kana=_kanatbl[_kanakey[i]]
 	_state="guess"
 end
@@ -725,9 +734,11 @@ function updateread()
 			local m=dget(_kana.index)
 			local rw=demem(m)
 			add(rw.r,guess,1)
-			if (#rw.r>6) del(rw.r)
+			while (#rw.r>6) do
+				rw.r[#rw.r]=nil
+			end
 			_kana.reads=rw.r
-			m=enmem(rw.r,rw.w)
+			m=enmem(rw.w,rw.r)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
