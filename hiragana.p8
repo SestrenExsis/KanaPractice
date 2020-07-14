@@ -856,18 +856,33 @@ function updatewrite()
 		else
 			updatewriteguess()
 		end
-	else
+	elseif _state=="check" then
+		local guess=-1
 		if btnp(⬆️) then
 			-- you got it right
-			_state="guess"
+			guess=1
+			_state="stats"
 			_guesses+=1
-			initscreen()
-			return
 		elseif btnp(⬇️) then
 			-- you got it wrong
-			_state="guess"
+			guess=0
+			_state="stats"
 			_errors+=1
 			_guesses+=1
+		end
+		if guess>=0 then
+			local m=dget(_kana.index)
+			local rw=demem(m)
+			add(rw.w,guess,1)
+			while (#rw.w>6) do
+				rw.w[#rw.w]=nil
+			end
+			_kana.writes=rw.w
+			m=enmem(rw.w,rw.r)
+			dset(_kana.index,m)
+		end
+	elseif _state=="stats" then
+		if btnp(❎) then
 			initscreen()
 			return
 		elseif btnp(🅾️) then
@@ -925,14 +940,17 @@ function drawwrite()
 		cursor(1,102,1)
 		print("write the kana")
 		print("press 🅾️ when finished")
-	else
-		cursor(1,96,1)
+	elseif _state=="check" then
+		cursor(1,102,1)
 		print("press ⬆️ if you were correct")
 		print("press ⬇️ if you were not")
+	elseif _state=="stats" then
+		cursor(1,102,1)
+		print("press ❎ to read another")
 		print("press 🅾️ to quit")
+		local correct=_guesses-_errors
+		print(correct.." / ".._guesses)
 	end
-	local correct=_guesses-_errors
-	print(correct.." / ".._guesses)
 end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
