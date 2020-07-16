@@ -48,67 +48,74 @@ cartdata("sestrenexsis_hiragana_0")
 function demem(
 	v  -- value       : number
 	)  -- return type : table
-	-- create write history
-	local wtbl={}
-	local wval=flr(v/0x0100)
-	while wval>0 do
-		add(wtbl,wval%2)
-		wval=flr(wval>>1)
-	end
-	deli(wtbl,#wtbl)
 	-- create read history
 	local rtbl={}
-	local rval=v%0x0100
+	local rval=flr(v)%0x8000
 	while rval>0 do
 		add(rtbl,rval%2)
 		rval=flr(rval>>1)
 	end
 	deli(rtbl,#rtbl)
+	-- create write history
+	local wtbl={}
+	local wval=flr((v<<16)%0x8000)
+	while wval>0 do
+		add(wtbl,wval%2)
+		wval=flr(wval>>1)
+	end
+	deli(wtbl,#wtbl)
 	local res={
-		w=wtbl, -- write attempts
-		r=rtbl  -- read attempts
+		r=rtbl, -- read attempts
+		w=wtbl  -- write attempts
 	}
 	return res
 end
 
 function enmem(
-	w, -- write attempts : table
-	r  -- read attempts  : table
+	r, -- read attempts  : table
+	w  -- write attempts : table
 	)  -- return type : number
 	local res=0
-	for i=1,min(6,#w) do
-		local v=w[i]*(2^(i-1))
-		res+=v*0x0100
+	for i=1,min(10,#r) do
+		local v=r[i]<<(i-1)
+		res+=v
 	end
-	res+=0x0100*2^#w
-	for i=1,min(6,#r) do
-		local v=r[i]*(2^(i-1))
-		res+=v*0x0001
+	res+=1<<#r
+	for i=1,min(10,#w) do
+		local v=w[i]>>(17-i)
+		res+=v
 	end
-	res+=0x0001*2^#r
+	res+=1>>(16-#w)
 	return res
 end
 
-function testmem(v,w,r)
-	assert(enmem(w,r)==v)
+function testmem(v,r,w)
+	print(tostr(enmem(r,w),true))
+	print(tostr(v,true))
+	assert(enmem(r,w)==v)
 	local tbl=demem(v)
-	--print(#tbl.w.." "..#w)
-	assert(#tbl.w==#w)
-	for i=1,#tbl.w do
-		--print(tbl.w[i].." "..w[i])
-		assert(tbl.w[i]==w[i])
-	end
 	--print(#tbl.r.." "..#r)
 	assert(#tbl.r==#r)
 	for i=1,#tbl.r do
 		--print(tbl.r[i].." "..r[i])
 		assert(tbl.r[i]==r[i])
 	end
+	--print(#tbl.w.." "..#w)
+	assert(#tbl.w==#w)
+	for i=1,#tbl.w do
+		--print(tbl.w[i].." "..w[i])
+		assert(tbl.w[i]==w[i])
+	end
 end
 
-testmem(0x2a7f,{0,1,0,1,0},{1,1,1,1,1,1})
-testmem(0x031d,{1},{1,0,1,1})
-testmem(0x1a2e,{0,1,0,1},{0,1,1,1,0})
+testmem(0x00cd.00cd,
+	{1,0,1,1,0,0,1},
+	{1,0,1,1,0,0,1}
+	)
+testmem(0x07ff.0002,
+	{1,1,1,1,1,1,1,1,1,1},
+	{0}
+	)
 -->8
 -- constants and constructors
 
@@ -641,14 +648,14 @@ function drawstudy()
 	for n,k in pairs(_kanatbl) do
 		local x=(1.5*s*8)*k.col
 		local y=(1.3*s*8)*k.row
-		local w=sum(k.reads)
+		local wt=sum(k.reads)
 		local bc=0
 		local fc=5
 		if (#k.reads>0) fc=8
-		if (w>= 1) fc=9  -- 3
-		if (w>= 2) fc=10 -- 6
-		if (w>= 3) fc=11 --10
-		if (w>= 4) fc=3  --15
+		if (wt>= 1) fc=9
+		if (wt>= 3) fc=10
+		if (wt>= 6) fc=11
+		if (wt>=10) fc=3
 		if k.col==cx and k.row==cy then
 			bc=fc
 			fc=7
@@ -673,11 +680,11 @@ function drawstudy()
 		local mt=demem(m)
 		print("r",61,86,12)
 		for i=1,#mt.r do
-			print(mt.r[i],61+8*i,86,6)
+			print(mt.r[i],61+4*i,86,6)
 		end
 		print("w",61,94,12)
 		for i=1,#mt.w do
-			print(mt.w[i],61+8*i,94,6)
+			print(mt.w[i],61+4*i,94,6)
 		end
 	end
 	cursor(0,114,1)
@@ -734,11 +741,11 @@ function updateread()
 			local m=dget(_kana.index)
 			local rw=demem(m)
 			add(rw.r,guess,1)
-			while (#rw.r>6) do
+			while (#rw.r>10) do
 				rw.r[#rw.r]=nil
 			end
 			_kana.reads=rw.r
-			m=enmem(rw.w,rw.r)
+			m=enmem(rw.r,rw.w)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
@@ -801,6 +808,7 @@ function nextwrite()
 	_brush=brush(64,64)
 	_lines=0
 	local i=flr(rnd(#_kanakey))+1
+	--local i=flr(rnd(5))+1
 	_kana=_kanatbl[_kanakey[i]]
 	_inks={{}}
 	_hint=false
@@ -874,11 +882,11 @@ function updatewrite()
 			local m=dget(_kana.index)
 			local rw=demem(m)
 			add(rw.w,guess,1)
-			while (#rw.w>6) do
+			while (#rw.w>10) do
 				rw.w[#rw.w]=nil
 			end
 			_kana.writes=rw.w
-			m=enmem(rw.w,rw.r)
+			m=enmem(rw.r,rw.w)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
