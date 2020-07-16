@@ -22,35 +22,34 @@ cartdata("sestrenexsis_hiragana_0")
 
 -- the demem() and enmem() 
 -- functions are for compactly
--- storing data about the 6
--- most recent read attempts and
--- 6 most recent write attempts
--- in local storage for a single
--- kana
-
+-- storing data about the 10
+-- most recent read and write
+-- attempts for each kana
+-- in local storage
 -- the portion before the 
 -- decimal stores data about 
--- read attempts
+-- reads
+-- the portion after the 
+-- decimal stores data about 
+-- writes
 
--- the portion after the
--- decimal stores data about
--- write attempts
-
--- the position of the leading 
--- 1 determines number of 
--- attempts (max 6)
-
--- the number of 0s after the 
--- leading 1 determines how 
--- many errors have been made 
--- (max 6)
+-- 0000 0000 0000 0000 . 0000 0000 0000 0000
+-- -a-- -bbb bbbb bbbb . -c-- -ddd dddd dddd
+-- ==== ==== ==== ==== . ==== ==== ==== ====
+-- a: included in read deck         1 bit(s)
+-- b: last ten read attempts       11 bit(s)
+-- c: included in write deck        1 bit(s)
+-- d: last ten write attempts      11 bit(s)
 
 function demem(
 	v  -- value       : number
 	)  -- return type : table
 	-- create read history
 	local rtbl={}
+	local ract=false
 	local rval=flr(v)%0x8000
+	if (rval&0x4000>0) ract=true
+	rval=rval&0x07ff
 	while rval>0 do
 		add(rtbl,rval%2)
 		rval=flr(rval>>1)
@@ -58,63 +57,72 @@ function demem(
 	deli(rtbl,#rtbl)
 	-- create write history
 	local wtbl={}
+	local wact=false
 	local wval=flr((v<<16)%0x8000)
+	if (wval&0x4000>0) wact=true
+	wval=wval&0x07ff
 	while wval>0 do
 		add(wtbl,wval%2)
 		wval=flr(wval>>1)
 	end
 	deli(wtbl,#wtbl)
 	local res={
-		r=rtbl, -- read attempts
-		w=wtbl  -- write attempts
+		r=ract,  -- in read deck
+		rh=rtbl, -- read attempts
+		w=wact,  -- in write deck
+		wh=wtbl  -- write attempts
 	}
 	return res
 end
 
 function enmem(
-	r, -- read attempts  : table
-	w  -- write attempts : table
+	r,  -- in read deck   : bool
+	rh, -- read attempts  : table
+	w,  -- in write deck  : bool
+	wh  -- write attempts : table
 	)  -- return type : number
 	local res=0
-	for i=1,min(10,#r) do
-		local v=r[i]<<(i-1)
+	for i=1,min(10,#rh) do
+		local v=rh[i]<<(i-1)
 		res+=v
 	end
-	res+=1<<#r
-	for i=1,min(10,#w) do
-		local v=w[i]>>(17-i)
+	res+=1<<#rh
+	if (r) res+=0x4000
+	for i=1,min(10,#wh) do
+		local v=wh[i]>>(17-i)
 		res+=v
 	end
-	res+=1>>(16-#w)
+	res+=1>>(16-#wh)
+	if (w) res+=0x0.4000
 	return res
 end
 
-function testmem(v,r,w)
-	print(tostr(enmem(r,w),true))
+function testmem(v,r,rh,w,wh)
+	print(tostr(enmem(r,rh,w,wh),true))
 	print(tostr(v,true))
-	assert(enmem(r,w)==v)
+	assert(enmem(r,rh,w,wh)==v)
 	local tbl=demem(v)
-	--print(#tbl.r.." "..#r)
-	assert(#tbl.r==#r)
-	for i=1,#tbl.r do
-		--print(tbl.r[i].." "..r[i])
-		assert(tbl.r[i]==r[i])
+	--print(#tbl.rh.." "..#rh)
+	assert(#tbl.rh==#rh)
+	for i=1,#tbl.rh do
+		--print(tbl.rh[i].." "..rh[i])
+		assert(tbl.rh[i]==rh[i])
 	end
-	--print(#tbl.w.." "..#w)
-	assert(#tbl.w==#w)
-	for i=1,#tbl.w do
-		--print(tbl.w[i].." "..w[i])
-		assert(tbl.w[i]==w[i])
+	--print(#tbl.wh.." "..#wh)
+	assert(#tbl.wh==#wh)
+	for i=1,#tbl.wh do
+		--print(tbl.wh[i].." "..wh[i])
+		assert(tbl.wh[i]==wh[i])
 	end
 end
 
 testmem(0x00cd.00cd,
-	{1,0,1,1,0,0,1},
-	{1,0,1,1,0,0,1}
+	false,{1,0,1,1,0,0,1},
+	false,{1,0,1,1,0,0,1}
 	)
 testmem(0x07ff.0002,
-	{1,1,1,1,1,1,1,1,1,1},
-	{0}
+	false,{1,1,1,1,1,1,1,1,1,1},
+	false,{0}
 	)
 -->8
 -- constants and constructors
@@ -233,8 +241,8 @@ function kana(
 		row=r,
 		col=c,
 		frames=f,
-		reads=rw.r,
-		writes=rw.w
+		reads=rw.rh,
+		writes=rw.wh
 	}
 	res.strokes=getstrokes(res)
 	return res
@@ -679,12 +687,12 @@ function drawstudy()
 		print(tostr(m,true),61,78,6)
 		local mt=demem(m)
 		print("r",61,86,12)
-		for i=1,#mt.r do
-			print(mt.r[i],61+4*i,86,6)
+		for i=1,#mt.rh do
+			print(mt.rh[i],61+4*i,86,6)
 		end
 		print("w",61,94,12)
-		for i=1,#mt.w do
-			print(mt.w[i],61+4*i,94,6)
+		for i=1,#mt.wh do
+			print(mt.wh[i],61+4*i,94,6)
 		end
 	end
 	cursor(0,114,1)
@@ -740,12 +748,12 @@ function updateread()
 		if guess>=0 then
 			local m=dget(_kana.index)
 			local rw=demem(m)
-			add(rw.r,guess,1)
-			while (#rw.r>10) do
-				rw.r[#rw.r]=nil
+			add(rw.rh,guess,1)
+			while (#rw.rh>10) do
+				rw.rh[#rw.rh]=nil
 			end
-			_kana.reads=rw.r
-			m=enmem(rw.r,rw.w)
+			_kana.reads=rw.rh
+			m=enmem(false,rw.rh,false,rw.wh)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
@@ -881,12 +889,12 @@ function updatewrite()
 		if guess>=0 then
 			local m=dget(_kana.index)
 			local rw=demem(m)
-			add(rw.w,guess,1)
-			while (#rw.w>10) do
-				rw.w[#rw.w]=nil
+			add(rw.wh,guess,1)
+			while (#rw.wh>10) do
+				rw.wh[#rw.wh]=nil
 			end
-			_kana.writes=rw.w
-			m=enmem(rw.r,rw.w)
+			_kana.writes=rw.wh
+			m=enmem(false,rw.rh,false,rw.wh)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
