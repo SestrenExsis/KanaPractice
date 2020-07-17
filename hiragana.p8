@@ -76,31 +76,34 @@ function demem(
 end
 
 function enmem(
-	r,  -- in read deck   : bool
-	rh, -- read attempts  : table
-	w,  -- in write deck  : bool
-	wh  -- write attempts : table
+	k   -- kana : table
 	)  -- return type : number
 	local res=0
-	for i=1,min(10,#rh) do
-		local v=rh[i]<<(i-1)
+	for i=1,min(10,#k.reads) do
+		local v=k.reads[i]<<(i-1)
 		res+=v
 	end
-	res+=1<<#rh
-	if (r) res+=0x4000
-	for i=1,min(10,#wh) do
-		local v=wh[i]>>(17-i)
+	res+=1<<#k.reads
+	if (k.read) res+=0x4000
+	for i=1,min(10,#k.writes) do
+		local v=k.writes[i]>>(17-i)
 		res+=v
 	end
-	res+=1>>(16-#wh)
-	if (w) res+=0x0.4000
+	res+=1>>(16-#k.writes)
+	if (k.write) res+=0x0.4000
 	return res
 end
 
 function testmem(v,r,rh,w,wh)
-	print(tostr(enmem(r,rh,w,wh),true))
+	local k={
+		read=r,
+		reads=rh,
+		write=w,
+		writes=wh
+	}
+	print(tostr(enmem(k),true))
 	print(tostr(v,true))
-	assert(enmem(r,rh,w,wh)==v)
+	assert(enmem(k)==v)
 	local tbl=demem(v)
 	--print(#tbl.rh.." "..#rh)
 	assert(#tbl.rh==#rh)
@@ -646,6 +649,7 @@ function initstudy()
 	_cursor=point(0,0)
 	_cols=5
 	_rows=11
+	_sk=nil -- selected kana
 end
 
 function updatestudy()
@@ -655,6 +659,11 @@ function updatestudy()
 	if (btnp(➡️)) _cursor.x+=1
 	_cursor.x=_cursor.x%_cols
 	_cursor.y=_cursor.y%_rows
+	if btnp(❎) and _sk!=nil then
+		_sk.read=not _sk.read
+		_sk.write=not _sk.write
+		dset(_sk.index,enmem(_sk))
+	end
 	if (btnp(🅾️)) initmenu()
 end
 
@@ -663,7 +672,7 @@ function drawstudy()
 	local cx=_cursor.x
 	local cy=_cursor.y
 	local s=1
-	local sk=nil
+	_sk=nil
 	for n,k in pairs(_kanatbl) do
 		local x=(1.5*s*8)*k.col
 		local y=(1.3*s*8)*k.row
@@ -678,23 +687,23 @@ function drawstudy()
 		if k.col==cx and k.row==cy then
 			bc=fc
 			fc=7
-			sk=k
+			_sk=k
 			rectfill(x,y,x+7,y+7,bc)
 		end
 		drawkana(k,x,y,s,fc)
 	end
-	if sk==nil then
+	if _sk==nil then
 		x=(1.5*s*8)*cx
 		y=(1.3*s*8)*cy
 		rectfill(x,y,x+7,y+7,1)
 	else
 		rect(60,1,61+66,2+66,6)
-		drawkana(sk,62,3,8,_c_cut)
+		drawkana(_sk,62,3,8,_c_cut)
 		local i=(12*t())%64
 		i=mid(0,i-16,64)
-		drawkana(sk,62,3,8,_c_dry,i)
-		print(sk.name,61,70,6)
-		local m=dget(sk.index)
+		drawkana(_sk,62,3,8,_c_dry,i)
+		print(_sk.name,61,70,6)
+		local m=dget(_sk.index)
 		print(tostr(m,true),61,78,6)
 		local mt=demem(m)
 		local r="-"
@@ -708,6 +717,14 @@ function drawstudy()
 		print(w.."w",61,94,12)
 		for i=1,#mt.wh do
 			print(mt.wh[i],65+4*i,94,6)
+		end
+		cursor(0,108,1)
+		if _sk==nil then
+			print("")
+		elseif _sk.read then
+			print("press ❎ to remove from deck")
+		else
+			print("press ❎ to add to deck")
 		end
 	end
 	cursor(0,114,1)
@@ -775,7 +792,7 @@ function updateread()
 				rw.rh[#rw.rh]=nil
 			end
 			_kana.reads=rw.rh
-			m=enmem(rw.r,rw.rh,rw.w,rw.wh)
+			m=enmem(_kana)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
@@ -916,7 +933,7 @@ function updatewrite()
 				rw.wh[#rw.wh]=nil
 			end
 			_kana.writes=rw.wh
-			m=enmem(rw.r,rw.rh,rw.w,rw.wh)
+			m=enmem(_kana)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
