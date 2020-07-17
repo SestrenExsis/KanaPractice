@@ -132,7 +132,6 @@ testmem(0x07ff.0002,
 -- pull : slowdown on paper
 -- pool : ink spread over time
 -- maxr : ink max spread
--- maxw : max wetness of ink
 -- dryt : time to finish drying
 
 _hint=true --enable stroke hinting
@@ -241,7 +240,9 @@ function kana(
 		row=r,
 		col=c,
 		frames=f,
+		read=rw.r,
 		reads=rw.rh,
+		write=rw.w,
 		writes=rw.wh
 	}
 	res.strokes=getstrokes(res)
@@ -414,6 +415,16 @@ function _init()
 	local mi=stat(84) --0..59
 	local sc=stat(85) --0..61
 	-- memory locations 0-45 are used for kana stats
+	if dget(57)==0 then
+		-- if this is first load
+		-- add vowels to deck
+		dset(0,0x4000.4000)
+		dset(1,0x4000.4000)
+		dset(2,0x4000.4000)
+		dset(3,0x4000.4000)
+		dset(4,0x4000.4000)
+	end
+	dset(57,1) -- cart loaded
 	dset(58,yr)
 	dset(59,mo)
 	dset(60,dy)
@@ -686,13 +697,17 @@ function drawstudy()
 		local m=dget(sk.index)
 		print(tostr(m,true),61,78,6)
 		local mt=demem(m)
-		print("r",61,86,12)
+		local r="-"
+		if (mt.r) r="+"
+		print(r.."r",61,86,12)
 		for i=1,#mt.rh do
-			print(mt.rh[i],61+4*i,86,6)
+			print(mt.rh[i],65+4*i,86,6)
 		end
-		print("w",61,94,12)
+		local w="-"
+		if (mt.w) w="+"
+		print(w.."w",61,94,12)
 		for i=1,#mt.wh do
-			print(mt.wh[i],61+4*i,94,6)
+			print(mt.wh[i],65+4*i,94,6)
 		end
 	end
 	cursor(0,114,1)
@@ -719,9 +734,16 @@ function initread()
 end
 
 function nextread()
-	local i=flr(rnd(#_kanakey))+1
-	--local i=flr(rnd(5))+1
-	_kana=_kanatbl[_kanakey[i]]
+	local cards={}
+	for i=1,#_kanakey do
+		local key=_kanakey[i]
+		local kana=_kanatbl[key]
+		if kana.read then
+			add(cards,kana.name)
+		end
+	end
+	local idx=flr(rnd(#cards))+1
+	_kana=_kanatbl[cards[idx]]
 	_state="guess"
 end
 
@@ -753,7 +775,7 @@ function updateread()
 				rw.rh[#rw.rh]=nil
 			end
 			_kana.reads=rw.rh
-			m=enmem(false,rw.rh,false,rw.wh)
+			m=enmem(rw.r,rw.rh,rw.w,rw.wh)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
@@ -894,7 +916,7 @@ function updatewrite()
 				rw.wh[#rw.wh]=nil
 			end
 			_kana.writes=rw.wh
-			m=enmem(false,rw.rh,false,rw.wh)
+			m=enmem(rw.r,rw.rh,rw.w,rw.wh)
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
