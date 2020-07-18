@@ -420,7 +420,7 @@ function _init()
 	-- memory locations 0-45 are used for kana stats
 	if dget(57)==0 then
 		-- if this is first load
-		-- add vowels to deck
+		-- add a,e,i,o,u to decks
 		dset(0,0x4000.4000)
 		dset(1,0x4000.4000)
 		dset(2,0x4000.4000)
@@ -660,8 +660,21 @@ function updatestudy()
 	_cursor.x=_cursor.x%_cols
 	_cursor.y=_cursor.y%_rows
 	if btnp(❎) and _sk!=nil then
-		_sk.read=not _sk.read
-		_sk.write=not _sk.write
+		local skr=_sk.read
+		local skw=_sk.write
+		if skr and skw then
+			_sk.read=false
+			_sk.write=false
+		elseif skr and not skw then
+			_sk.read=true
+			_sk.write=true
+		elseif not skr and skw then
+			_sk.read=true
+			_sk.write=false
+		else
+			_sk.read=false
+			_sk.write=true
+		end
 		dset(_sk.index,enmem(_sk))
 	end
 	if (btnp(🅾️)) initmenu()
@@ -724,10 +737,8 @@ function drawstudy()
 		cursor(0,108,1)
 		if _sk==nil then
 			print("")
-		elseif _sk.read then
-			print("press ❎ to remove from deck")
 		else
-			print("press ❎ to add to deck")
+			print("press ❎ to change deck(s)")
 		end
 	end
 	cursor(0,114,1)
