@@ -601,7 +601,8 @@ function initmenu()
 	palt(7,true)
 	_menuindex=1
 	_menu={
-		"   study deck   ",
+		"study read deck ",
+		"study write deck",
 		"practice reading",
 		"practice writing"
 	}
@@ -612,9 +613,10 @@ function updatemenu()
 		if (btnp(⬇️)) _menuindex+=1
 		_menuindex=1+(_menuindex-1)%#_menu
 	if btnp(❎) then
-		if (_menuindex==1) initstudy()
-		if (_menuindex==2) initread()
-		if (_menuindex==3) initwrite()
+		if (_menuindex==1) initreaddeck()
+		if (_menuindex==2) initwritedeck()
+		if (_menuindex==3) initread()
+		if (_menuindex==4) initwrite()
 	end
 end
 
@@ -637,22 +639,22 @@ function drawmenu()
 	end
 end
 -->8
--- study screen
+-- read/write deck screens
 
-function initstudy()
+function initreaddeck()
 	_debug={
 		screen="study"
 	}
-	initfn=initstudy
-	updatefn=updatestudy
-	drawfn=drawstudy
+	initfn=initreaddeck
+	updatefn=updatereaddeck
+	drawfn=drawreaddeck
 	_cursor=point(0,0)
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
 end
 
-function updatestudy()
+function updatereaddeck()
 	if (btnp(⬆️)) _cursor.y-=1
 	if (btnp(⬇️)) _cursor.y+=1
 	if (btnp(⬅️)) _cursor.x-=1
@@ -661,26 +663,13 @@ function updatestudy()
 	_cursor.y=_cursor.y%_rows
 	if btnp(❎) and _sk!=nil then
 		local skr=_sk.read
-		local skw=_sk.write
-		if skr and skw then
-			_sk.read=false
-			_sk.write=false
-		elseif skr and not skw then
-			_sk.read=true
-			_sk.write=true
-		elseif not skr and skw then
-			_sk.read=true
-			_sk.write=false
-		else
-			_sk.read=false
-			_sk.write=true
-		end
+		_sk.read=not _sk.read
 		dset(_sk.index,enmem(_sk))
 	end
 	if (btnp(🅾️)) initmenu()
 end
 
-function drawstudy()
+function drawreaddeck()
 	cls()
 	local cx=_cursor.x
 	local cy=_cursor.y
@@ -697,7 +686,7 @@ function drawstudy()
 		if (wt>= 3) fc=10
 		if (wt>= 6) fc=11
 		if (wt>=10) fc=3
-		if k.read or k.write then
+		if k.read then
 			bc=fc
 			fc=7
 			rectfill(x,y,x+7,y+7,bc)
@@ -722,27 +711,112 @@ function drawstudy()
 		local m=dget(_sk.index)
 		print(tostr(m,true),61,78,6)
 		local mt=demem(m)
-		local r="-"
-		if (mt.r) r="+"
-		print(r.."r",61,86,12)
+		local act="-"
+		if (mt.r) act="+"
+		print(act.."r",61,86,12)
 		for i=1,#mt.rh do
 			print(mt.rh[i],65+4*i,86,6)
-		end
-		local w="-"
-		if (mt.w) w="+"
-		print(w.."w",61,94,12)
-		for i=1,#mt.wh do
-			print(mt.wh[i],65+4*i,94,6)
 		end
 		cursor(0,108,1)
 		if _sk==nil then
 			print("")
+		elseif _sk.read then
+			print("press ❎ to remove from deck")
 		else
-			print("press ❎ to change deck(s)")
+			print("press ❎ to add to deck")
 		end
 	end
 	cursor(0,114,1)
-	print("press 🅾️ to quit studying")
+	print("press 🅾️ to exit")
+end
+
+function initwritedeck()
+	_debug={
+		screen="study"
+	}
+	initfn=initwritedeck
+	updatefn=updatewritedeck
+	drawfn=drawwritedeck
+	_cursor=point(0,0)
+	_cols=5
+	_rows=11
+	_sk=nil -- selected kana
+end
+
+function updatewritedeck()
+	if (btnp(⬆️)) _cursor.y-=1
+	if (btnp(⬇️)) _cursor.y+=1
+	if (btnp(⬅️)) _cursor.x-=1
+	if (btnp(➡️)) _cursor.x+=1
+	_cursor.x=_cursor.x%_cols
+	_cursor.y=_cursor.y%_rows
+	if btnp(❎) and _sk!=nil then
+		local skr=_sk.write
+		_sk.write=not _sk.write
+		dset(_sk.index,enmem(_sk))
+	end
+	if (btnp(🅾️)) initmenu()
+end
+
+function drawwritedeck()
+	cls()
+	local cx=_cursor.x
+	local cy=_cursor.y
+	local s=1
+	_sk=nil
+	for n,k in pairs(_kanatbl) do
+		local x=1+(1.5*s*8)*k.col
+		local y=1+(1.3*s*8)*k.row
+		local wt=sum(k.writes)
+		local bc=0
+		local fc=5
+		if (#k.writes>0) fc=8
+		if (wt>= 1) fc=9
+		if (wt>= 3) fc=10
+		if (wt>= 6) fc=11
+		if (wt>=10) fc=3
+		if k.write then
+			bc=fc
+			fc=7
+			rectfill(x,y,x+7,y+7,bc)
+		end
+		drawkana(k,x,y,s,fc)
+		if k.col==cx and k.row==cy then
+			_sk=k
+			rect(x-1,y-1,x+8,y+8,7)
+		end
+	end
+	if _sk==nil then
+		x=(1.5*s*8)*cx
+		y=(1.3*s*8)*cy
+		rectfill(x,y,x+7,y+7,1)
+	else
+		rect(60,1,61+66,2+66,6)
+		drawkana(_sk,62,3,8,_c_cut)
+		local i=(12*t())%64
+		i=mid(0,i-16,64)
+		drawkana(_sk,62,3,8,_c_dry,i)
+		print(_sk.name,61,70,6)
+		local m=dget(_sk.index)
+		print(tostr(m,true),61,78,6)
+		local mt=demem(m)
+		local act="-"
+		if (mt.w) act="+"
+		print(act.."w",61,86,12)
+		for i=1,#mt.wh do
+			print(mt.wh[i],65+4*i,86,6)
+		end
+		cursor(0,108,1)
+		if _sk==nil then
+			print("")
+		elseif _sk.write then
+			print("press ❎ to remove from deck")
+		else
+			print("press ❎ to add to deck")
+		end
+	end
+	cursor(0,114,1)
+	print("press 🅾️ to exit")
 end
 -->8
 -- read screen
@@ -1053,10 +1127,10 @@ __gfx__
 0e0000e000011000000e10000001e000001000000010000000e0000000100000001000000010000000e00000010000000e000000010000000100000000000001
 00e00e0000001000000010000000e000001000000010000000e0000000100000001000000010000000e00000010100000e010000010100000107000000000001
 000ee0000001000000010000000e00000001111000011110000eeee0000111000001110000011100000eee00010011100e001110010011100100eee000011110
-00070000000100000000000007eeeeee011111170700001001000070000100000007000000010000000100000001000000000000000000000000000007000100
-011e11000111110000eeee000000011000000ee000e0010000100e0007eee010011e1010011110700111101001111010070011100100eee0010011100e000100
-000e0000000100007e0000e0000010000000e000000e10000001e0000010000100e000010010000e00100001001000010e01000001070000010100000e111110
-000e1110000eeee00000000e00010000000e000000010000000e00000010010000e001000010010000100700001001000e00000001000000010000000e101001
+00070000000100000000000007eeeeee011111170700010001000700000100000007000000010000000100000001000000000000000000000000000007000100
+011e11000111110000eeee000000011000000ee000e010000010e00007eee010011e1010011110700111101001111010070011100100eee0010011100e000100
+000e0000000100007e0000e0000010000000e000000e0000000e00000010000100e000010010000e00100001001000010e01000001070000010100000e111110
+000e1110000eeee00000000e00010000000e00000010000000e000000010010000e001000010010000100700001001000e00000001000000010000000e101001
 00e000010070000e0000000e00010000000e00000010000000e00000010001000e0001000100010001000e00010001000e000000010000000100000010e01001
 000000010000000e000000e000010000000e00000010000000e0000000011110000111100001111000011e10000eeee00e000000010000000100000010e11011
 000000010000000e00000e00000010000000e0000010000000e0000000100100001001000010010000e00e00007001000e0100000101000001070000010e0101
