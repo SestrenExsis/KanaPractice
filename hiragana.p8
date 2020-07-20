@@ -144,6 +144,7 @@ _pool=0.200
 _maxr=5.000
 _dryt={3.4,0.2,0.2,0.2}
 _mous=false
+_hints={}
 
 function point(xpos,ypos)
 	local res={
@@ -452,6 +453,13 @@ end
 
 -- helper functions
 
+function drawhint()
+	if #_hints>0 then
+		cursor(0,114,1)
+		print(_hints[1])
+	end
+end
+
 function hamming(num)
 	local res=0
 	while num>0 do
@@ -564,6 +572,9 @@ function inittitle()
 	_debug={
 		screen="title"
 	}
+	_hints={
+		"press ❎ to go to menu"
+	}
 	initfn=inittitle
 	updatefn=updatetitle
 	drawfn=drawtitle
@@ -579,8 +590,7 @@ end
 
 function drawtitle()
 	cls()
-	cursor(0,114,1)
-	print("press ❎ to go to menu")
+	drawhint()
 end
 -->8
 -- menu screen
@@ -601,6 +611,9 @@ function initmenu()
 		"practice reading",
 		"practice writing"
 	}
+	_hints={
+		"press ❎ to select"
+	}
 end
 
 function updatemenu()
@@ -617,8 +630,6 @@ end
 
 function drawmenu()
 	cls()
-	cursor(0,114,1)
-	print("press ❎ to select")
 	for i,text in ipairs(_menu) do
 		local bc=7
 		local fc=3
@@ -632,6 +643,7 @@ function drawmenu()
 		rectfill(x,y+1,x+71,y+10,bc)
 		print(text,33,y+3,fc)
 	end
+	drawhint()
 end
 -->8
 -- read/write deck screens
@@ -647,6 +659,9 @@ function initreaddeck()
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
+	_hints={
+		"press 🅾️ to exit"
+	}
 end
 
 function updatereaddeck()
@@ -721,8 +736,7 @@ function drawreaddeck()
 			print("press ❎ to add to deck")
 		end
 	end
-	cursor(0,114,1)
-	print("press 🅾️ to exit")
+	drawhint()
 end
 
 function initwritedeck()
@@ -736,6 +750,9 @@ function initwritedeck()
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
+	_hints={
+		"press 🅾️ to exit"
+	}
 end
 
 function updatewritedeck()
@@ -810,8 +827,7 @@ function drawwritedeck()
 			print("press ❎ to add to deck")
 		end
 	end
-	cursor(0,114,1)
-	print("press 🅾️ to exit")
+	drawhint()
 end
 -->8
 -- read screen
@@ -831,6 +847,7 @@ function initread()
 	nextread()
 	_errors=0
 	_guesses=0
+	_hints={}
 end
 
 function nextread()
@@ -911,6 +928,7 @@ function drawread()
 		local correct=_guesses-_errors
 		print(correct.." / ".._guesses)
 	end
+	drawhint()
 end
 -->8
 -- write screen
@@ -932,6 +950,7 @@ function initwrite()
 	nextwrite()
 	_errors=0
 	_guesses=0
+	_hints={}
 end
 
 function nextwrite()
@@ -1095,6 +1114,7 @@ function drawwrite()
 		local correct=_guesses-_errors
 		print(correct.." / ".._guesses)
 	end
+	drawhint()
 end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
