@@ -455,8 +455,9 @@ end
 
 function drawhint()
 	if #_hints>0 then
+		local i=1+(flr(t())%#_hints)
 		cursor(0,114,1)
-		print(_hints[1])
+		print(_hints[i])
 	end
 end
 
@@ -659,8 +660,12 @@ function initreaddeck()
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
+	_msgs={}
+	_msgs["xit"]="press 🅾️ to exit"
+	_msgs["add"]="press ❎ to add to deck"
+	_msgs["del"]="press ❎ to remove from deck"
 	_hints={
-		"press 🅾️ to exit"
+		_msgs["xit"]
 	}
 end
 
@@ -677,6 +682,23 @@ function updatereaddeck()
 		dset(_sk.index,enmem(_sk))
 	end
 	if (btnp(🅾️)) initmenu()
+	if _sk==nil then
+		if #_hints>1 then
+			_hints[#_hints]=nil
+		end
+	elseif _sk.read then
+		if #_hints>1 then
+			_hints[2]=_msgs["del"]
+		else
+			add(_hints,_msgs["del"])
+		end
+	else
+		if #_hints>1 then
+			_hints[2]=_msgs["add"]
+		else
+			add(_hints,_msgs["add"])
+		end
+	end
 end
 
 function drawreaddeck()
@@ -726,14 +748,6 @@ function drawreaddeck()
 		print(act.."r",61,86,12)
 		for i=1,#mt.rh do
 			print(mt.rh[i],65+4*i,86,6)
-		end
-		cursor(0,108,1)
-		if _sk==nil then
-			print("")
-		elseif _sk.read then
-			print("press ❎ to remove from deck")
-		else
-			print("press ❎ to add to deck")
 		end
 	end
 	drawhint()
