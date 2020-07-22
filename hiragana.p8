@@ -18,7 +18,8 @@ __lua__
 -- * choose a random kana
 -- * ask the player to draw it
 
-cartdata("sestrenexsis_hiragana_0")
+_version=1
+cartdata("sestrenexsis_hiragana_".._version)
 
 -- the demem() and enmem() 
 -- functions are for compactly
@@ -119,6 +120,7 @@ function testmem(v,r,rh,w,wh)
 	end
 end
 
+--[[
 testmem(0x00cd.00cd,
 	false,{1,0,1,1,0,0,1},
 	false,{1,0,1,1,0,0,1}
@@ -127,6 +129,7 @@ testmem(0x07ff.0002,
 	false,{1,1,1,1,1,1,1,1,1,1},
 	false,{0}
 	)
+]]--
 -->8
 -- constants and constructors
 
@@ -408,6 +411,10 @@ end
 -->8
 -- main functions
 
+-- memory locations:
+-- 0-45 : stats for each kana
+-- 63   : memory version
+
 function _init()
 	local yr=stat(80) --4-digit
 	local mo=stat(81) --1..12
@@ -415,8 +422,7 @@ function _init()
 	local hr=stat(83) --0..23
 	local mi=stat(84) --0..59
 	local sc=stat(85) --0..61
-	-- memory locations 0-45 are used for kana stats
-	if dget(57)==0 then
+	if dget(63)==0 then
 		-- if this is first load
 		-- add a,e,i,o,u to decks
 		dset(0,0x4000.4000)
@@ -425,17 +431,17 @@ function _init()
 		dset(3,0x4000.4000)
 		dset(4,0x4000.4000)
 	end
-	dset(57,1) -- cart loaded
-	dset(58,yr)
-	dset(59,mo)
-	dset(60,dy)
-	dset(61,hr)
-	dset(62,mi)
-	dset(63,sc)
+	dset(57,yr)
+	dset(58,mo)
+	dset(59,dy)
+	dset(60,hr)
+	dset(61,mi)
+	dset(62,sc)
+	dset(63,_version)
 	inittitle()
-	assert(hamming(0x0001)==1)
-	assert(hamming(0x0003)==2)
-	assert(hamming(0x0007)==3)
+	--assert(hamming(0x0001)==1)
+	--assert(hamming(0x0003)==2)
+	--assert(hamming(0x0007)==3)
 end
 
 function initscreen()
