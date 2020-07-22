@@ -144,7 +144,6 @@ _pool=0.200
 _maxr=5.000
 _dryt={3.4,0.2,0.2,0.2}
 _mous=false
-_hints={}
 
 function point(xpos,ypos)
 	local res={
@@ -453,11 +452,13 @@ end
 
 -- helper functions
 
-function drawhint()
-	if #_hints>0 then
-		local i=1+(flr(t())%#_hints)
-		cursor(0,114,1)
-		print(_hints[i])
+function drawmsgs()
+	if _lmsg!=nil and #_lmsg>0 then
+		print(_lmsg,3,114,1)
+	end
+	if _rmsg!=nil and #_rmsg>0 then
+		local x=128-4*#_rmsg-3
+		print(_rmsg,x,114,1)
 	end
 end
 
@@ -573,9 +574,8 @@ function inittitle()
 	_debug={
 		screen="title"
 	}
-	_hints={
-		"press ❎ to go to menu"
-	}
+	_lmsg=""
+	_rmsg="main menu ❎"
 	initfn=inittitle
 	updatefn=updatetitle
 	drawfn=drawtitle
@@ -591,7 +591,7 @@ end
 
 function drawtitle()
 	cls()
-	drawhint()
+	drawmsgs()
 end
 -->8
 -- menu screen
@@ -612,9 +612,8 @@ function initmenu()
 		"practice reading",
 		"practice writing"
 	}
-	_hints={
-		"press ❎ to select"
-	}
+	_lmsg=""
+	_rmsg="choose ❎"
 end
 
 function updatemenu()
@@ -644,7 +643,7 @@ function drawmenu()
 		rectfill(x,y+1,x+71,y+10,bc)
 		print(text,33,y+3,fc)
 	end
-	drawhint()
+	drawmsgs()
 end
 -->8
 -- read/write deck screens
@@ -660,13 +659,10 @@ function initreaddeck()
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
-	_msgs={}
-	_msgs["xit"]="press 🅾️ to exit"
-	_msgs["add"]="press ❎ to add to deck"
-	_msgs["del"]="press ❎ to remove from deck"
-	_hints={
-		_msgs["xit"]
-	}
+	_lmsg="🅾️ exit"
+	_rmsg=""
+	_msg_add="add card ❎"
+	_msg_del="remove card ❎"
 end
 
 function updatereaddeck()
@@ -683,21 +679,11 @@ function updatereaddeck()
 	end
 	if (btnp(🅾️)) initmenu()
 	if _sk==nil then
-		if #_hints>1 then
-			_hints[#_hints]=nil
-		end
+		_rmsg=""
 	elseif _sk.read then
-		if #_hints>1 then
-			_hints[2]=_msgs["del"]
-		else
-			add(_hints,_msgs["del"])
-		end
+		_rmsg=_msg_del
 	else
-		if #_hints>1 then
-			_hints[2]=_msgs["add"]
-		else
-			add(_hints,_msgs["add"])
-		end
+		_rmsg=_msg_add
 	end
 end
 
@@ -750,7 +736,7 @@ function drawreaddeck()
 			print(mt.rh[i],65+4*i,86,6)
 		end
 	end
-	drawhint()
+	drawmsgs()
 end
 
 function initwritedeck()
@@ -764,9 +750,10 @@ function initwritedeck()
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
-	_hints={
-		"press 🅾️ to exit"
-	}
+	_lmsg="🅾️ exit"
+	_rmsg=""
+	_msg_add="add card ❎"
+	_msg_del="remove card ❎"
 end
 
 function updatewritedeck()
@@ -782,6 +769,13 @@ function updatewritedeck()
 		dset(_sk.index,enmem(_sk))
 	end
 	if (btnp(🅾️)) initmenu()
+	if _sk==nil then
+		_rmsg=""
+	elseif _sk.write then
+		_rmsg=_msg_del
+	else
+		_rmsg=_msg_add
+	end
 end
 
 function drawwritedeck()
@@ -832,16 +826,8 @@ function drawwritedeck()
 		for i=1,#mt.wh do
 			print(mt.wh[i],65+4*i,86,6)
 		end
-		cursor(0,108,1)
-		if _sk==nil then
-			print("")
-		elseif _sk.write then
-			print("press ❎ to remove from deck")
-		else
-			print("press ❎ to add to deck")
-		end
 	end
-	drawhint()
+	drawmsgs()
 end
 -->8
 -- read screen
@@ -861,7 +847,6 @@ function initread()
 	nextread()
 	_errors=0
 	_guesses=0
-	_hints={}
 end
 
 function nextread()
@@ -881,17 +866,21 @@ end
 function updateread()
 	-- get input
 	if _state=="guess" then
+		_lmsg=""
+		_rmsg="check ❎"
 		if btnp(❎) or btnp(🅾️) then
 			_state="check"
 		end
 	elseif _state=="check" then
+		_lmsg="🅾️ no"
+		_rmsg="yes ❎"
 		local guess=-1
-		if btnp(⬆️) then
+		if btnp(❎) then
 			-- you got it right
 			guess=1
 			_state="stats"
 			_guesses+=1
-		elseif btnp(⬇️) then
+		elseif btnp(🅾️) then
 			-- you got it wrong
 			guess=0
 			_state="stats"
@@ -910,6 +899,8 @@ function updateread()
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
+		_lmsg="🅾️ exit"
+		_rmsg="read another ❎"
 		if btnp(❎) then
 			initscreen()
 			return
@@ -927,22 +918,16 @@ function drawread()
 	if _state=="guess" then
 		cursor(1,96,1)
 		print("say the kana out loud")
-		print("")
-		print("press ❎ or 🅾️ to check")
 	elseif _state=="check" then
 		cursor(1,84,1)
 		print("the answer was "..k.name)
-		print("")
-		print("press ⬆️ if you were correct")
-		print("press ⬇️ if you were not")
+		print("did you get it right?")
 	elseif _state=="stats" then
 		cursor(1,90,1)
-		print("press ❎ to read another")
-		print("press 🅾️ to quit")
 		local correct=_guesses-_errors
 		print(correct.." / ".._guesses)
 	end
-	drawhint()
+	drawmsgs()
 end
 -->8
 -- write screen
@@ -964,7 +949,6 @@ function initwrite()
 	nextwrite()
 	_errors=0
 	_guesses=0
-	_hints={}
 end
 
 function nextwrite()
@@ -982,6 +966,7 @@ function nextwrite()
 	_kana=_kanatbl[cards[idx]]
 	_inks={{}}
 	_state="guess"
+	_cheat=false
 end
 
 function updatewriteguess()
@@ -993,7 +978,7 @@ function updatewriteguess()
 		sfx(0)
 	end
 	if btnp(❎,1) then
-		_cheat=not _cheat
+		_cheat=true
 		sfx(0)
 	end
 	if _mous then
@@ -1027,6 +1012,8 @@ end
 
 function updatewrite()
 	if _state=="guess" then
+		_lmsg="🅾️ finish"
+		_rmsg="draw ❎"
 		if btnp(🅾️) then
 			_state="check"
 			return
@@ -1034,13 +1021,15 @@ function updatewrite()
 			updatewriteguess()
 		end
 	elseif _state=="check" then
+		_lmsg="🅾️ no"
+		_rmsg="yes ❎"
 		local guess=-1
-		if btnp(⬆️) then
+		if btnp(❎) then
 			-- you got it right
 			guess=1
 			_state="stats"
 			_guesses+=1
-		elseif btnp(⬇️) then
+		elseif btnp(🅾️) then
 			-- you got it wrong
 			guess=0
 			_state="stats"
@@ -1059,6 +1048,8 @@ function updatewrite()
 			dset(_kana.index,m)
 		end
 	elseif _state=="stats" then
+		_lmsg="🅾️ exit"
+		_rmsg="draw another ❎"
 		if btnp(❎) then
 			initscreen()
 			return
@@ -1073,7 +1064,7 @@ function drawwrite()
 	cls(_c_cnv)
 	local k=_kana
 	rect(23,23,120,120,6)
-	-- draw hint
+	-- draw cheat
 	if _state=="check" then
 		_cheat=true
 	end
@@ -1116,19 +1107,15 @@ function drawwrite()
 	if _state=="guess" then
 		cursor(1,102,1)
 		print("write the kana")
-		print("press 🅾️ when finished")
 	elseif _state=="check" then
 		cursor(1,102,1)
-		print("press ⬆️ if you were correct")
-		print("press ⬇️ if you were not")
+		print("did you get it right?")
 	elseif _state=="stats" then
 		cursor(1,102,1)
-		print("press ❎ to read another")
-		print("press 🅾️ to quit")
 		local correct=_guesses-_errors
 		print(correct.." / ".._guesses)
 	end
-	drawhint()
+	drawmsgs()
 end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
