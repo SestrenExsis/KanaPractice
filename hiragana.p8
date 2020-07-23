@@ -574,6 +574,8 @@ function drawkana(
 end
 
 -->8
+-- title/menu screens
+
 -- title screen
 
 function inittitle()
@@ -599,7 +601,7 @@ function drawtitle()
 	cls()
 	drawmsgs()
 end
--->8
+
 -- menu screen
 
 function initmenu()
@@ -618,8 +620,8 @@ function initmenu()
 		"practice reading",
 		"practice writing"
 	}
-	_lmsg=""
-	_rmsg="choose ❎"
+	_lmsg="⬆️⬇️ choose"
+	_rmsg="open ❎"
 end
 
 function updatemenu()
@@ -652,7 +654,9 @@ function drawmenu()
 	drawmsgs()
 end
 -->8
--- read/write deck screens
+-- study deck screens
+
+-- study read deck screen
 
 function initreaddeck()
 	_debug={
@@ -744,6 +748,8 @@ function drawreaddeck()
 	end
 	drawmsgs()
 end
+
+-- study write deck screen
 
 function initwritedeck()
 	_debug={
