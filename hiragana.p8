@@ -416,12 +416,6 @@ end
 -- 63   : memory version
 
 function _init()
-	local yr=stat(80) --4-digit
-	local mo=stat(81) --1..12
-	local dy=stat(82) --1..31
-	local hr=stat(83) --0..23
-	local mi=stat(84) --0..59
-	local sc=stat(85) --0..61
 	if dget(63)==0 then
 		-- if this is first load
 		-- add a,e,i,o,u to decks
@@ -431,6 +425,33 @@ function _init()
 		dset(3,0x4000.4000)
 		dset(4,0x4000.4000)
 	end
+	-- store previous login time
+	local l=""
+	if dget(57)==0 then
+		l="this is your first login"
+	else
+		local yr=tostr(dget(57))
+		local mo=tostr(dget(58))
+		if (#mo==1) mo="0"..mo
+		local dy=tostr(dget(59))
+		if (#dy==1) dy="0"..dy
+		local hr=tostr(dget(60))
+		if (#hr==1) hr="0"..hr
+		local mi=tostr(dget(61))
+		if (#mi==1) mi="0"..mi
+		local sc=tostr(dget(62))
+		if (#sc==1) sc="0"..sc
+		l=l..yr.."-"..mo.."-"..dy
+		l=l.." "..hr..":"..mi.." utc"
+	end
+	_logtm=l
+	-- get current time
+	yr=stat(80) --4-digit
+	mo=stat(81) --1..12
+	dy=stat(82) --1..31
+	hr=stat(83) --0..23
+	mi=stat(84) --0..59
+	sc=stat(85) --0..61
 	dset(57,yr)
 	dset(58,mo)
 	dset(59,dy)
@@ -599,6 +620,7 @@ end
 
 function drawtitle()
 	cls()
+	print(_logtm)
 	drawmsgs()
 end
 
