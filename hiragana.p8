@@ -428,7 +428,7 @@ function _init()
 	-- store previous login time
 	local l=""
 	if dget(57)==0 then
-		l="this is your first login"
+		l="no practice logged yet"
 	else
 		local yr=tostr(dget(57))
 		local mo=tostr(dget(58))
@@ -445,6 +445,11 @@ function _init()
 		l=l.." "..hr..":"..mi.." utc"
 	end
 	_logtm=l
+	dset(63,_version)
+	inittitle()
+end
+
+function studytime()
 	-- get current time
 	yr=stat(80) --4-digit
 	mo=stat(81) --1..12
@@ -458,11 +463,6 @@ function _init()
 	dset(60,hr)
 	dset(61,mi)
 	dset(62,sc)
-	dset(63,_version)
-	inittitle()
-	--assert(hamming(0x0001)==1)
-	--assert(hamming(0x0003)==2)
-	--assert(hamming(0x0007)==3)
 end
 
 function initscreen()
@@ -914,12 +914,14 @@ function updateread()
 			guess=1
 			_state="stats"
 			_guesses+=1
+			studytime()
 		elseif btnp(🅾️) then
 			-- you got it wrong
 			guess=0
 			_state="stats"
 			_errors+=1
 			_guesses+=1
+			studytime()
 		end
 		if guess>=0 then
 			local m=dget(_kana.index)
@@ -1063,12 +1065,14 @@ function updatewrite()
 			guess=1
 			_state="stats"
 			_guesses+=1
+			studytime()
 		elseif btnp(🅾️) then
 			-- you got it wrong
 			guess=0
 			_state="stats"
 			_errors+=1
 			_guesses+=1
+			studytime()
 		end
 		if guess>=0 then
 			local m=dget(_kana.index)
