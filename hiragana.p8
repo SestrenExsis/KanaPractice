@@ -143,7 +143,7 @@ testmem(0x07ff.0002,
 _accl=0.175
 _drag=0.100
 _pull=0.650
-_pool=0.200
+_pool=0.400
 _maxr=5.000
 _dryt={3.4,0.2,0.2,0.2}
 _mous=false
