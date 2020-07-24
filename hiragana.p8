@@ -691,10 +691,12 @@ function initreaddeck()
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
+	_decksz=0
 	_lmsg="🅾️ exit"
 	_rmsg=""
 	_msg_add="add card ❎"
 	_msg_del="remove card ❎"
+	_msg_lst="last card in deck"
 end
 
 function updatereaddeck()
@@ -705,15 +707,20 @@ function updatereaddeck()
 	_cursor.x=_cursor.x%_cols
 	_cursor.y=_cursor.y%_rows
 	if btnp(❎) and _sk!=nil then
-		local skr=_sk.read
-		_sk.read=not _sk.read
-		dset(_sk.index,enmem(_sk))
+		if _decksz>1 or not _sk.read then
+			_sk.read=not _sk.read
+			dset(_sk.index,enmem(_sk))
+		end
 	end
 	if (btnp(🅾️)) initmenu()
 	if _sk==nil then
 		_rmsg=""
 	elseif _sk.read then
-		_rmsg=_msg_del
+		if _decksz<2 then
+			_rmsg=_msg_lst
+		else
+			_rmsg=_msg_del
+		end
 	else
 		_rmsg=_msg_add
 	end
@@ -725,6 +732,7 @@ function drawreaddeck()
 	local cy=_cursor.y
 	local s=1
 	_sk=nil
+	_decksz=0
 	for n,k in pairs(_kanatbl) do
 		local x=1+(1.5*s*8)*k.col
 		local y=1+(1.3*s*8)*k.row
@@ -737,6 +745,7 @@ function drawreaddeck()
 		if (wt>= 6) fc=11
 		if (wt>=10) fc=3
 		if k.read then
+			_decksz+=1
 			bc=fc
 			fc=7
 			rectfill(x,y,x+7,y+7,bc)
@@ -784,10 +793,12 @@ function initwritedeck()
 	_cols=5
 	_rows=11
 	_sk=nil -- selected kana
+	_decksz=0
 	_lmsg="🅾️ exit"
 	_rmsg=""
 	_msg_add="add card ❎"
 	_msg_del="remove card ❎"
+	_msg_lst="last card in deck"
 end
 
 function updatewritedeck()
@@ -798,15 +809,20 @@ function updatewritedeck()
 	_cursor.x=_cursor.x%_cols
 	_cursor.y=_cursor.y%_rows
 	if btnp(❎) and _sk!=nil then
-		local skr=_sk.write
-		_sk.write=not _sk.write
-		dset(_sk.index,enmem(_sk))
+		if _decksz>1 or not _sk.read then
+			_sk.write=not _sk.write
+			dset(_sk.index,enmem(_sk))
+		end
 	end
 	if (btnp(🅾️)) initmenu()
 	if _sk==nil then
 		_rmsg=""
 	elseif _sk.write then
-		_rmsg=_msg_del
+		if _decksz<2 then
+			_rmsg=_msg_lst
+		else
+			_rmsg=_msg_del
+		end
 	else
 		_rmsg=_msg_add
 	end
@@ -818,6 +834,7 @@ function drawwritedeck()
 	local cy=_cursor.y
 	local s=1
 	_sk=nil
+	_decksz=0
 	for n,k in pairs(_kanatbl) do
 		local x=1+(1.5*s*8)*k.col
 		local y=1+(1.3*s*8)*k.row
@@ -830,6 +847,7 @@ function drawwritedeck()
 		if (wt>= 6) fc=11
 		if (wt>=10) fc=3
 		if k.write then
+			_decksz+=1
 			bc=fc
 			fc=7
 			rectfill(x,y,x+7,y+7,bc)
