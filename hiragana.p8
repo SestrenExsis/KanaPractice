@@ -413,7 +413,27 @@ end
 
 -- memory locations:
 -- 0-45 : stats for each kana
+-- 62   : previous study time
 -- 63   : memory version
+
+function logtm()
+	local res=0
+	res+=ceil(365.25*(stat(80)%100))
+	local leap=stat(80)%4==0
+	local julian={
+		 0,  31, 59,
+		 90,120,151,
+		181,212,243,
+		273,304,334
+		}
+	res+=julian[stat(81)]
+	if (leap and stat(81)>2) res+=1
+	res+=stat(82)-1
+	res+=stat(83)/24
+	res+=stat(84)/24/60
+	res+=stat(85)/24/60/60
+	return res
+end
 
 function _init()
 	if dget(63)==0 then
@@ -425,44 +445,14 @@ function _init()
 		dset(3,0x4000.4000)
 		dset(4,0x4000.4000)
 	end
-	-- store previous login time
-	local l=""
-	if dget(57)==0 then
-		l="no practice logged yet"
-	else
-		local yr=tostr(dget(57))
-		local mo=tostr(dget(58))
-		if (#mo==1) mo="0"..mo
-		local dy=tostr(dget(59))
-		if (#dy==1) dy="0"..dy
-		local hr=tostr(dget(60))
-		if (#hr==1) hr="0"..hr
-		local mi=tostr(dget(61))
-		if (#mi==1) mi="0"..mi
-		local sc=tostr(dget(62))
-		if (#sc==1) sc="0"..sc
-		l=l..yr.."-"..mo.."-"..dy
-		l=l.." "..hr..":"..mi.." utc"
-	end
-	_logtm=l
+	-- store previous study time
+	_logtm=dget(62)
 	dset(63,_version)
 	inittitle()
 end
 
 function studytime()
-	-- get current time
-	yr=stat(80) --4-digit
-	mo=stat(81) --1..12
-	dy=stat(82) --1..31
-	hr=stat(83) --0..23
-	mi=stat(84) --0..59
-	sc=stat(85) --0..61
-	dset(57,yr)
-	dset(58,mo)
-	dset(59,dy)
-	dset(60,hr)
-	dset(61,mi)
-	dset(62,sc)
+	dset(62,logtm())
 end
 
 function initscreen()
@@ -593,7 +583,6 @@ function drawkana(
 	local res=(i>0)
 	return res
 end
-
 -->8
 -- title/menu screens
 
@@ -621,6 +610,7 @@ end
 function drawtitle()
 	cls()
 	print(_logtm)
+	print(logtm())
 	drawmsgs()
 end
 
