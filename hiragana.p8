@@ -750,8 +750,8 @@ function drawreaddeck()
 		end
 	end
 	if _sk==nil then
-		x=(1.5*s*8)*cx
-		y=(1.3*s*8)*cy
+		x=1+(1.5*s*8)*cx
+		y=1+(1.3*s*8)*cy
 		rectfill(x,y,x+7,y+7,1)
 	else
 		rect(60,1,61+66,2+66,6)
