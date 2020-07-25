@@ -416,7 +416,7 @@ end
 -- 62   : previous study time
 -- 63   : memory version
 
-function logtm()
+function entime()
 	local res=0
 	res+=ceil(365.25*(stat(80)%100))
 	local leap=stat(80)%4==0
@@ -432,6 +432,18 @@ function logtm()
 	res+=stat(83)/24
 	res+=stat(84)/24/60
 	res+=stat(85)/24/60/60
+	return res
+end
+
+function detime(tm)
+	local dy=flr(tm)
+	local hr=flr(tm*24)%24
+	local mi=flr(tm*24*60)%60
+	local sc=flr(tm*24*60*60)%60
+	local res=dy.."d "
+	res=res..hr.."h "
+	res=res..mi.."m "
+	res=res..sc.."s"
 	return res
 end
 
@@ -452,7 +464,7 @@ function _init()
 end
 
 function studytime()
-	dset(62,logtm())
+	dset(62,entime())
 end
 
 function initscreen()
@@ -610,7 +622,10 @@ end
 function drawtitle()
 	cls()
 	print(_logtm)
-	print(logtm())
+	local curtm=entime()
+	print(curtm)
+	local tm=detime(curtm-_logtm)
+	print("last studied "..tm.." ago")
 	drawmsgs()
 end
 
