@@ -601,9 +601,6 @@ end
 -- title screen
 
 function inittitle()
-	_debug={
-		screen="title"
-	}
 	_lmsg=""
 	_rmsg="main menu ❎"
 	initfn=inittitle
@@ -633,9 +630,6 @@ end
 -- menu screen
 
 function initmenu()
-	_debug={
-		screen="main menu"
-	}
 	initfn=initmenu
 	updatefn=updatemenu
 	drawfn=drawmenu
@@ -690,9 +684,6 @@ end
 -- study read deck screen
 
 function initreaddeck()
-	_debug={
-		screen="study"
-	}
 	initfn=initreaddeck
 	updatefn=updatereaddeck
 	drawfn=drawreaddeck
@@ -792,9 +783,6 @@ end
 -- study write deck screen
 
 function initwritedeck()
-	_debug={
-		screen="study"
-	}
 	initfn=initwritedeck
 	updatefn=updatewritedeck
 	drawfn=drawwritedeck
@@ -899,9 +887,6 @@ end
 -- * stats : show stats
 
 function initread()
-	_debug={
-		screen="read"
-	}
 	initfn=nextread
 	updatefn=updateread
 	drawfn=drawread
@@ -1001,9 +986,6 @@ end
 -- * stats : show stats
 
 function initwrite()
-	_debug={
-		screen="write"
-	}
 	initfn=nextwrite
 	updatefn=updatewrite
 	drawfn=drawwrite
