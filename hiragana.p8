@@ -724,7 +724,7 @@ function updatereaddeck()
 		sfx(58)
 	end
 	if btnp(❎) and _sk!=nil then
-		if _decksz>1 or not _sk.read then
+		if _decksz>2 or not _sk.read then
 			_sk.read=not _sk.read
 			dset(_sk.index,enmem(_sk))
 			if _sk.read then
@@ -926,6 +926,7 @@ function initread()
 	drawfn=drawread
 	_errors=0
 	_guesses=0
+	_lidx=0
 	_deck={}
 	for i=1,#_kanakey do
 		local key=_kanakey[i]
@@ -938,7 +939,11 @@ function initread()
 end
 
 function nextread()
-	local idx=flr(rnd(#_deck))+1
+	local idx=0
+	repeat
+		idx=flr(rnd(#_deck))+1
+	until idx!=_lidx
+	_lidx=idx
 	_kana=_kanatbl[_deck[idx]]
 	_state="guess"
 end
@@ -1029,6 +1034,7 @@ function initwrite()
 	palt(7,true)
 	_errors=0
 	_guesses=0
+	_lidx=0
 	_deck={}
 	for i=1,#_kanakey do
 		local key=_kanakey[i]
@@ -1041,10 +1047,14 @@ function initwrite()
 end
 
 function nextwrite()
+	local idx=0
+	repeat
+		idx=flr(rnd(#_deck))+1
+	until idx!=_lidx
+	_lidx=idx
+	_kana=_kanatbl[_deck[idx]]
 	_brush=brush(64,64)
 	_lines=0
-	local idx=flr(rnd(#_deck))+1
-	_kana=_kanatbl[_deck[idx]]
 	_inks={{}}
 	_state="guess"
 	_cheat=false
