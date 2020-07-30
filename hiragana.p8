@@ -702,10 +702,14 @@ function initreaddeck()
 	_rmsg=""
 	_msg_add="add card ❎"
 	_msg_del="remove card ❎"
-	_msg_lst="last card in deck"
+	_msg_lst="need 2+ cards"
 end
 
 function updatereaddeck()
+	_decksz=0
+	for n,k in pairs(_kanatbl) do
+		if (k.read) _decksz+=1
+	end
 	local lx=_cursor.x
 	local ly=_cursor.y
 	if (btnp(⬆️)) _cursor.y-=1
@@ -734,7 +738,7 @@ function updatereaddeck()
 	if _sk==nil then
 		_rmsg=""
 	elseif _sk.read then
-		if _decksz<2 then
+		if _decksz<3 then
 			_rmsg=_msg_lst
 		else
 			_rmsg=_msg_del
@@ -750,7 +754,6 @@ function drawreaddeck()
 	local cy=_cursor.y
 	local s=1
 	_sk=nil
-	_decksz=0
 	for n,k in pairs(_kanatbl) do
 		local x=1+(1.5*s*8)*k.col
 		local y=1+(1.3*s*8)*k.row
@@ -763,7 +766,6 @@ function drawreaddeck()
 		if (wt>= 6) fc=11
 		if (wt>=10) fc=3
 		if k.read then
-			_decksz+=1
 			bc=fc
 			fc=7
 			rectfill(x,y,x+7,y+7,bc)
@@ -813,10 +815,14 @@ function initwritedeck()
 	_rmsg=""
 	_msg_add="add card ❎"
 	_msg_del="remove card ❎"
-	_msg_lst="last card in deck"
+	_msg_lst="need 2+ cards"
 end
 
 function updatewritedeck()
+	_decksz=0
+	for n,k in pairs(_kanatbl) do
+		if (k.write) _decksz+=1
+	end
 	local lx=_cursor.x
 	local ly=_cursor.y
 	if (btnp(⬆️)) _cursor.y-=1
@@ -831,7 +837,7 @@ function updatewritedeck()
 		sfx(58)
 	end
 	if btnp(❎) and _sk!=nil then
-		if _decksz>1 or not _sk.read then
+		if _decksz>2 or not _sk.write then
 			_sk.write=not _sk.write
 			dset(_sk.index,enmem(_sk))
 			if _sk.write then
@@ -845,7 +851,7 @@ function updatewritedeck()
 	if _sk==nil then
 		_rmsg=""
 	elseif _sk.write then
-		if _decksz<2 then
+		if _decksz<3 then
 			_rmsg=_msg_lst
 		else
 			_rmsg=_msg_del
@@ -861,7 +867,6 @@ function drawwritedeck()
 	local cy=_cursor.y
 	local s=1
 	_sk=nil
-	_decksz=0
 	for n,k in pairs(_kanatbl) do
 		local x=1+(1.5*s*8)*k.col
 		local y=1+(1.3*s*8)*k.row
@@ -874,7 +879,6 @@ function drawwritedeck()
 		if (wt>= 6) fc=11
 		if (wt>=10) fc=3
 		if k.write then
-			_decksz+=1
 			bc=fc
 			fc=7
 			rectfill(x,y,x+7,y+7,bc)
