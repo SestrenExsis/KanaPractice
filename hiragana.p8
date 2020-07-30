@@ -924,22 +924,22 @@ function initread()
 	initfn=nextread
 	updatefn=updateread
 	drawfn=drawread
-	nextread()
 	_errors=0
 	_guesses=0
-end
-
-function nextread()
-	local cards={}
+	_deck={}
 	for i=1,#_kanakey do
 		local key=_kanakey[i]
 		local kana=_kanatbl[key]
 		if kana.read then
-			add(cards,kana.name)
+			add(_deck,kana.name)
 		end
 	end
-	local idx=flr(rnd(#cards))+1
-	_kana=_kanatbl[cards[idx]]
+	nextread()
+end
+
+function nextread()
+	local idx=flr(rnd(#_deck))+1
+	_kana=_kanatbl[_deck[idx]]
 	_state="guess"
 end
 
@@ -1027,24 +1027,24 @@ function initwrite()
 	drawfn=drawwrite
 	palt(0,false)
 	palt(7,true)
-	nextwrite()
 	_errors=0
 	_guesses=0
+	_deck={}
+	for i=1,#_kanakey do
+		local key=_kanakey[i]
+		local kana=_kanatbl[key]
+		if kana.write then
+			add(_deck,kana.name)
+		end
+	end
+	nextwrite()
 end
 
 function nextwrite()
 	_brush=brush(64,64)
 	_lines=0
-	local cards={}
-	for i=1,#_kanakey do
-		local key=_kanakey[i]
-		local kana=_kanatbl[key]
-		if kana.write then
-			add(cards,kana.name)
-		end
-	end
-	local idx=flr(rnd(#cards))+1
-	_kana=_kanatbl[cards[idx]]
+	local idx=flr(rnd(#_deck))+1
+	_kana=_kanatbl[_deck[idx]]
 	_inks={{}}
 	_state="guess"
 	_cheat=false
