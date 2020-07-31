@@ -1043,6 +1043,7 @@ function initwrite()
 			add(_deck,kana.name)
 		end
 	end
+	_brush=brush(64,64)
 	nextwrite()
 end
 
@@ -1053,7 +1054,8 @@ function nextwrite()
 	until idx!=_lidx
 	_lidx=idx
 	_kana=_kanatbl[_deck[idx]]
-	_brush=brush(64,64)
+	_brush.lon=false
+	_brush.on=false
 	_lines=0
 	_inks={{}}
 	_state="guess"
