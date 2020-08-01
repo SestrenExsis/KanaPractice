@@ -687,6 +687,38 @@ end
 -->8
 -- study deck screens
 
+function drawcard(
+	k, -- kana    : table
+	x, -- x pos   : number
+	y, -- y pos   : number
+	m, -- mode    : str
+	a  -- active  : bool
+	)
+	local bc=0
+	local fc=5
+	local wt=0
+	if m=="r" then
+		wt=sum(k.reads)
+		if (#k.reads>0) fc=8
+	elseif m=="w" then
+		wt=sum(k.writes)
+		if (#k.writes>0) fc=8
+	end
+	if (wt>= 1) fc=9
+	if (wt>= 3) fc=10
+	if (wt>= 6) fc=11
+	if (wt>=10) fc=3
+	if (m=="r" and k.read) or (m=="w" and k.write) then
+		bc=fc
+		fc=7
+		rectfill(x,y,x+7,y+7,bc)
+	end
+	drawkana(k,x,y,1,fc)
+	if a then
+		rect(x-1,y-1,x+8,y+8,7)
+	end
+end
+
 -- study read deck screen
 
 function initreaddeck()
@@ -757,24 +789,9 @@ function drawreaddeck()
 	for n,k in pairs(_kanatbl) do
 		local x=1+(1.4*s*8)*k.col
 		local y=1+(1.4*s*8)*k.row
-		local wt=sum(k.reads)
-		local bc=0
-		local fc=5
-		if (#k.reads>0) fc=8
-		if (wt>= 1) fc=9
-		if (wt>= 3) fc=10
-		if (wt>= 6) fc=11
-		if (wt>=10) fc=3
-		if k.read then
-			bc=fc
-			fc=7
-			rectfill(x,y,x+7,y+7,bc)
-		end
-		drawkana(k,x,y,s,fc)
-		if k.col==cx and k.row==cy then
-			_sk=k
-			rect(x-1,y-1,x+8,y+8,7)
-		end
+		local act=k.col==cx and k.row==cy
+		drawcard(k,x,y,"r",act)
+		if (act) _sk=k
 	end
 	if _sk==nil then
 		x=1+(1.4*s*8)*cx
@@ -877,24 +894,9 @@ function drawwritedeck()
 	for n,k in pairs(_kanatbl) do
 		local x=1+(1.4*s*8)*k.col
 		local y=1+(1.4*s*8)*k.row
-		local wt=sum(k.writes)
-		local bc=0
-		local fc=5
-		if (#k.writes>0) fc=8
-		if (wt>= 1) fc=9
-		if (wt>= 3) fc=10
-		if (wt>= 6) fc=11
-		if (wt>=10) fc=3
-		if k.write then
-			bc=fc
-			fc=7
-			rectfill(x,y,x+7,y+7,bc)
-		end
-		drawkana(k,x,y,s,fc)
-		if k.col==cx and k.row==cy then
-			_sk=k
-			rect(x-1,y-1,x+8,y+8,7)
-		end
+		local act=k.col==cx and k.row==cy
+		drawcard(k,x,y,"w",act)
+		if (act) _sk=k
 	end
 	if _sk==nil then
 		x=(1.4*s*8)*cx
