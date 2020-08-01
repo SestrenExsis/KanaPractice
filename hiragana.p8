@@ -233,16 +233,16 @@ end
 function kana(
 	n, -- name    : str
 	i, -- index   : number
-	r, -- row pos : number
 	c, -- col pos : number
+	r, -- row pos : number
 	f  -- frames  : table
 	) -- return type: table
 	local rw=demem(dget(i))
 	local res={
 		name=n,
 		index=i,
-		row=r,
 		col=c,
+		row=r,
 		frames=f,
 		read=rw.r,
 		reads=rw.rh,
@@ -694,8 +694,8 @@ function initreaddeck()
 	updatefn=updatereaddeck
 	drawfn=drawreaddeck
 	_cursor=point(0,0)
-	_cols=5
-	_rows=11
+	_cols=11
+	_rows=5
 	_sk=nil -- selected kana
 	_decksz=0
 	_lmsg="🅾️ exit"
@@ -755,8 +755,8 @@ function drawreaddeck()
 	local s=1
 	_sk=nil
 	for n,k in pairs(_kanatbl) do
-		local x=1+(1.5*s*8)*k.col
-		local y=1+(1.3*s*8)*k.row
+		local x=1+(1.4*s*8)*k.col
+		local y=1+(1.4*s*8)*k.row
 		local wt=sum(k.reads)
 		local bc=0
 		local fc=5
@@ -777,24 +777,31 @@ function drawreaddeck()
 		end
 	end
 	if _sk==nil then
-		x=1+(1.5*s*8)*cx
-		y=1+(1.3*s*8)*cy
+		x=1+(1.4*s*8)*cx
+		y=1+(1.4*s*8)*cy
 		rectfill(x,y,x+7,y+7,1)
 	else
-		rect(60,1,61+66,2+66,6)
-		drawkana(_sk,62,3,8,_c_cut)
+		local scl=7
+		local lft=0
+		local rgt=lft+scl*8+3
+		local top=56
+		local btm=top+scl*8+3
+		rect(lft,top,rgt,btm,6)
+		drawkana(_sk,lft+2,top+2,scl,_c_cut)
 		local i=(12*t())%64
 		i=mid(0,i-16,64)
-		drawkana(_sk,62,3,8,_c_dry,i)
-		print(_sk.name,61,70,6)
+		drawkana(_sk,lft+2,top+2,scl,_c_dry,i)
+		lft=rgt+4
+		top=top+2
+		print(_sk.name,lft,top,6)
 		local m=dget(_sk.index)
-		print(tostr(m,true),61,78,6)
+		print(tostr(m,true),lft,top+8,6)
 		local mt=demem(m)
 		local act="-"
 		if (mt.r) act="+"
-		print(act.."r",61,86,12)
+		print(act.."r",lft,top+16,12)
 		for i=1,#mt.rh do
-			print(mt.rh[i],65+4*i,86,6)
+			print(mt.rh[i],lft+4+4*i,top+16,6)
 		end
 	end
 	drawmsgs()
@@ -807,8 +814,8 @@ function initwritedeck()
 	updatefn=updatewritedeck
 	drawfn=drawwritedeck
 	_cursor=point(0,0)
-	_cols=5
-	_rows=11
+	_cols=11
+	_rows=5
 	_sk=nil -- selected kana
 	_decksz=0
 	_lmsg="🅾️ exit"
@@ -868,8 +875,8 @@ function drawwritedeck()
 	local s=1
 	_sk=nil
 	for n,k in pairs(_kanatbl) do
-		local x=1+(1.5*s*8)*k.col
-		local y=1+(1.3*s*8)*k.row
+		local x=1+(1.4*s*8)*k.col
+		local y=1+(1.4*s*8)*k.row
 		local wt=sum(k.writes)
 		local bc=0
 		local fc=5
@@ -890,24 +897,31 @@ function drawwritedeck()
 		end
 	end
 	if _sk==nil then
-		x=(1.5*s*8)*cx
-		y=(1.3*s*8)*cy
+		x=(1.4*s*8)*cx
+		y=(1.4*s*8)*cy
 		rectfill(x,y,x+7,y+7,1)
 	else
-		rect(60,1,61+66,2+66,6)
-		drawkana(_sk,62,3,8,_c_cut)
+		local scl=7
+		local lft=0
+		local rgt=lft+scl*8+3
+		local top=56
+		local btm=top+scl*8+3
+		rect(lft,top,rgt,btm,6)
+		drawkana(_sk,lft+2,top+2,scl,_c_cut)
 		local i=(12*t())%64
 		i=mid(0,i-16,64)
-		drawkana(_sk,62,3,8,_c_dry,i)
-		print(_sk.name,61,70,6)
+		drawkana(_sk,lft+2,top+2,scl,_c_dry,i)
+		lft=rgt+4
+		top=top+2
+		print(_sk.name,lft,top,6)
 		local m=dget(_sk.index)
-		print(tostr(m,true),61,78,6)
+		print(tostr(m,true),lft,top+8,6)
 		local mt=demem(m)
 		local act="-"
 		if (mt.w) act="+"
-		print(act.."w",61,86,12)
+		print(act.."r",lft,top+16,12)
 		for i=1,#mt.wh do
-			print(mt.wh[i],65+4*i,86,6)
+			print(mt.wh[i],lft+4+4*i,top+16,6)
 		end
 	end
 	drawmsgs()
