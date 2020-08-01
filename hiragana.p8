@@ -694,34 +694,56 @@ function drawcard(
 	m, -- mode    : str
 	a  -- active  : bool
 	)
-	local bc=0
-	local fc=5
+	-- draw shadow
+	rectfill(x+1,y,x+8,y+13,5)
+	rectfill(x,y+1,x+9,y+12,5)
+	if k=="" then
+		return
+	end
+	-- calc progress bar
 	local wt=0
+	local c_bar=2
+	local w_bar=1
 	if m=="r" then
 		wt=sum(k.reads)
-		if (#k.reads>0) fc=8
+		if (#k.reads>0) c_bar=14
 	elseif m=="w" then
 		wt=sum(k.writes)
-		if (#k.writes>0) fc=8
+		if (#k.writes>0) c_bar=14
 	end
-	if (wt>= 1) fc=9
-	if (wt>= 3) fc=10
-	if (wt>= 6) fc=11
-	if (wt>=10) fc=3
+	if (wt>= 1) c_bar=9
+	if (wt>= 3) c_bar=10
+	if (wt>= 6) c_bar=11
+	if (wt>=10) c_bar=12
+	if c_bar==14 then
+		w_bar=2
+	elseif c_bar>8 then
+		w_bar=c_bar-6
+	end
+	-- calc card appearance
+	local c_crd=7
+	local c_stk=13
 	if (m=="r" and k.read) or (m=="w" and k.write) then
-		bc=fc
-		fc=7
-		rectfill(x,y,x+7,y+7,bc)
+		c_crd=13
+		c_stk=1
 	end
-	drawkana(k,x,y,1,fc)
+	if (not a) y-=2
 	if a then
-		rect(x-1,y-1,x+8,y+8,7)
+		y-=0.5*sin(t()/1.5)
 	end
+	-- draw card
+	rectfill(x+1,y,x+8,y+13,c_crd)
+	rectfill(x,y+1,x+9,y+12,c_crd)
+	-- draw kana and progress bar
+	drawkana(k,x+1,y+1,1,c_stk)
+	rectfill(x+1,y+10,x+8,y+12)
+	line(x+2,y+11,x+1+w_bar,y+11,c_bar)
 end
 
 -- study read deck screen
 
 function initreaddeck()
+	pal()
 	initfn=initreaddeck
 	updatefn=updatereaddeck
 	drawfn=drawreaddeck
@@ -784,24 +806,22 @@ function drawreaddeck()
 	cls()
 	local cx=_cursor.x
 	local cy=_cursor.y
-	local s=1
+	local x=4+11*cx
+	local y=38+17*cy
+	drawcard("",x,y,"",true)
 	_sk=nil
 	for n,k in pairs(_kanatbl) do
-		local x=1+(1.4*s*8)*k.col
-		local y=1+(1.4*s*8)*k.row
+		x=4+11*k.col
+		y=38+17*k.row
 		local act=k.col==cx and k.row==cy
 		drawcard(k,x,y,"r",act)
 		if (act) _sk=k
 	end
-	if _sk==nil then
-		x=1+(1.4*s*8)*cx
-		y=1+(1.4*s*8)*cy
-		rectfill(x,y,x+7,y+7,1)
-	else
-		local scl=7
-		local lft=0
+	if _sk!=nil then
+		local scl=3
+		local lft=1
 		local rgt=lft+scl*8+3
-		local top=56
+		local top=1
 		local btm=top+scl*8+3
 		rect(lft,top,rgt,btm,6)
 		drawkana(_sk,lft+2,top+2,scl,_c_cut)
@@ -827,6 +847,7 @@ end
 -- study write deck screen
 
 function initwritedeck()
+	pal()
 	initfn=initwritedeck
 	updatefn=updatewritedeck
 	drawfn=drawwritedeck
@@ -889,24 +910,22 @@ function drawwritedeck()
 	cls()
 	local cx=_cursor.x
 	local cy=_cursor.y
-	local s=1
+	local x=4+11*cx
+	local y=38+17*cy
+	drawcard("",x,y,"",true)
 	_sk=nil
 	for n,k in pairs(_kanatbl) do
-		local x=1+(1.4*s*8)*k.col
-		local y=1+(1.4*s*8)*k.row
+		x=4+11*k.col
+		y=38+17*k.row
 		local act=k.col==cx and k.row==cy
 		drawcard(k,x,y,"w",act)
 		if (act) _sk=k
 	end
-	if _sk==nil then
-		x=(1.4*s*8)*cx
-		y=(1.4*s*8)*cy
-		rectfill(x,y,x+7,y+7,1)
-	else
-		local scl=7
-		local lft=0
+	if _sk!=nil then
+		local scl=3
+		local lft=1
 		local rgt=lft+scl*8+3
-		local top=56
+		local top=1
 		local btm=top+scl*8+3
 		rect(lft,top,rgt,btm,6)
 		drawkana(_sk,lft+2,top+2,scl,_c_cut)
@@ -921,7 +940,7 @@ function drawwritedeck()
 		local mt=demem(m)
 		local act="-"
 		if (mt.w) act="+"
-		print(act.."r",lft,top+16,12)
+		print(act.."w",lft,top+16,12)
 		for i=1,#mt.wh do
 			print(mt.wh[i],lft+4+4*i,top+16,6)
 		end
