@@ -694,50 +694,57 @@ function drawcard(
 	m, -- mode    : str
 	a  -- active  : bool
 	)
-	-- draw shadow
-	rectfill(x+1,y,x+8,y+13,5)
-	rectfill(x,y+1,x+9,y+12,5)
-	if k=="" then
-		return
-	end
-	-- calc progress bar
-	local wt=0
+	local c_shd=2
+	local c_crd=5
+	local c_stk=0
 	local c_bar=2
 	local w_bar=1
-	if m=="r" then
-		wt=sum(k.reads)
-		if (#k.reads>0) c_bar=14
-	elseif m=="w" then
-		wt=sum(k.writes)
-		if (#k.writes>0) c_bar=14
+	if k=="" then
+		-- draw only shadow
+		rectfill(x+1,y,x+8,y+13,c_shd)
+		rectfill(x,y+1,x+9,y+12,c_shd)
+	else
+		-- calc progress bar
+		local wt=0
+		if m=="r" then
+			wt=sum(k.reads)
+			if (#k.reads>0) c_bar=14
+		elseif m=="w" then
+			wt=sum(k.writes)
+			if (#k.writes>0) c_bar=14
+		end
+		if (wt>= 1) c_bar=9
+		if (wt>= 3) c_bar=10
+		if (wt>= 6) c_bar=11
+		if (wt>=10) c_bar=12
+		if c_bar==14 then
+			w_bar=2
+		elseif c_bar>8 then
+			w_bar=c_bar-6
+		end
+		-- calc card appearance
+		if (m=="r" and k.read) or (m=="w" and k.write) then
+			c_shd=13
+			c_crd=7
+			c_stk=1
+		else
+			c_bar=5
+		end
+		-- draw shadow
+		rectfill(x+1,y,x+8,y+13,c_shd)
+		rectfill(x,y+1,x+9,y+12,c_shd)
+		if (not a) y-=2
+		if a then
+			y-=0.5*sin(t()/1.5)
+		end
+		-- draw card
+		rectfill(x+1,y,x+8,y+13,c_crd)
+		rectfill(x,y+1,x+9,y+12,c_crd)
+		-- draw kana and progress bar
+		drawkana(k,x+1,y+1,1,c_stk)
+		rectfill(x+1,y+10,x+8,y+12)
+		line(x+2,y+11,x+1+w_bar,y+11,c_bar)
 	end
-	if (wt>= 1) c_bar=9
-	if (wt>= 3) c_bar=10
-	if (wt>= 6) c_bar=11
-	if (wt>=10) c_bar=12
-	if c_bar==14 then
-		w_bar=2
-	elseif c_bar>8 then
-		w_bar=c_bar-6
-	end
-	-- calc card appearance
-	local c_crd=7
-	local c_stk=13
-	if (m=="r" and k.read) or (m=="w" and k.write) then
-		c_crd=13
-		c_stk=1
-	end
-	if (not a) y-=2
-	if a then
-		y-=0.5*sin(t()/1.5)
-	end
-	-- draw card
-	rectfill(x+1,y,x+8,y+13,c_crd)
-	rectfill(x,y+1,x+9,y+12,c_crd)
-	-- draw kana and progress bar
-	drawkana(k,x+1,y+1,1,c_stk)
-	rectfill(x+1,y+10,x+8,y+12)
-	line(x+2,y+11,x+1+w_bar,y+11,c_bar)
 end
 
 -- study read deck screen
