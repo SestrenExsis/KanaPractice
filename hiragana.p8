@@ -440,10 +440,10 @@ function detime(tm)
 	local hr=flr(tm*24)%24
 	local mi=flr(tm*24*60)%60
 	local sc=flr(tm*24*60*60)%60
-	local res=dy.."d "
-	res=res..hr.."h "
-	res=res..mi.."m "
-	res=res..sc.."s"
+	local res=dy.." days, "
+	res=res..hr.." hrs"
+	--res=res..mi.."m "
+	--res=res..sc.."s"
 	return res
 end
 
@@ -618,12 +618,21 @@ end
 function drawtitle()
 	cls()
 	pal()
+	rectfill(0,0,127,8,7)
+	rectfill(0,10,127,13,6)
+	rectfill(0,15,127,16,5)
+	rectfill(0,18,127,18,1)
+	rectfill(0,109,127,109,1)
+	rectfill(0,112,127,111,5)
+	rectfill(0,117,127,114,6)
+	rectfill(0,127,127,119,7)
+	color(1)
 	if _logtm==0 then
-		print("welcome!")
+		print("welcome!",1,2)
 	else
 		local curtm=entime()
 		local tm=detime(curtm-_logtm)
-		print("last studied "..tm.." ago")
+		print("last studied "..tm.." ago",1,2)
 	end
 	drawmsgs()
 	pal(1,3)
