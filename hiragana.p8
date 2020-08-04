@@ -481,13 +481,14 @@ end
 
 -- helper functions
 
-function drawmsgs()
+function drawmsgs(p)
+	if (p==nil) p=1.0
 	if _lmsg!=nil and #_lmsg>0 then
-		print(_lmsg,3,122,1)
+		print(_lmsg,3,137-15*p,1)
 	end
 	if _rmsg!=nil and #_rmsg>0 then
 		local x=128-4*#_rmsg-4
-		print(_rmsg,x,122,1)
+		print(_rmsg,x,137-15*p,1)
 	end
 end
 
@@ -618,27 +619,29 @@ end
 function drawtitle()
 	cls()
 	pal()
-	rectfill(0,0,127,8,7)
-	rectfill(0,10,127,13,6)
-	rectfill(0,15,127,16,5)
-	rectfill(0,18,127,18,1)
-	rectfill(0,109,127,109,1)
-	rectfill(0,112,127,111,5)
-	rectfill(0,117,127,114,6)
-	rectfill(0,127,127,119,7)
+	local p=1.25*min(0.8,t())
+	local y=-20+20*p
+	rectfill(0,y+0,127,y+8,7)
+	rectfill(0,y+10,127,y+13,6)
+	rectfill(0,y+15,127,y+16,5)
+	rectfill(0,y+18,127,y+18,1)
+	rectfill(0,127-y-18,127,127-y-18,1)
+	rectfill(0,127-y-15,127,127-y-16,5)
+	rectfill(0,127-y-10,127,127-y-13,6)
+	rectfill(0,127-y-0,127,127-y-8,7)
 	color(1)
 	if _logtm==0 then
-		print("welcome!",1,2)
+		print("welcome!",1,2-y)
 	else
 		local curtm=entime()
 		local tm=detime(curtm-_logtm)
-		print("last studied "..tm.." ago",1,2)
+		print("last studied "..tm.." ago",1,2+y)
 	end
-	drawmsgs()
+	drawmsgs(p)
 	pal(1,3)
 	pal(2,7)
 	spr(196,32,38,8,3)
-	print("v".._version,1,122)
+	print("v".._version,1,122-y)
 end
 
 -- menu screen
