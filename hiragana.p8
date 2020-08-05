@@ -619,7 +619,7 @@ end
 function drawtitle()
 	cls()
 	pal()
-	local p=1.25*min(0.8,t())
+	local p=2*min(0.5,t())
 	local y=-20+20*p
 	rectfill(0,y+0,127,y+8,7)
 	rectfill(0,y+10,127,y+13,6)
@@ -631,7 +631,7 @@ function drawtitle()
 	rectfill(0,127-y-0,127,127-y-8,7)
 	color(1)
 	if _logtm==0 then
-		print("welcome!",1,2-y)
+		print("ready to learn hiragana?",1,2+y)
 	else
 		local curtm=entime()
 		local tm=detime(curtm-_logtm)
@@ -778,6 +778,17 @@ function initreaddeck()
 	_msg_lst="need 2+ cards"
 end
 
+function invertdeck(m)
+	for n,k in pairs(_kanatbl) do
+		if m=="r" then
+			k.read=not k.read
+		elseif m=="w" then
+			k.write=not k.write
+		end
+		dset(k.index,enmem(k))
+	end
+end
+
 function updatereaddeck()
 	_decksz=0
 	for n,k in pairs(_kanatbl) do
@@ -785,6 +796,10 @@ function updatereaddeck()
 	end
 	local lx=_cursor.x
 	local ly=_cursor.y
+	if btnp(❎,1) then
+		invertdeck("r")
+		sfx(0)
+	end
 	if (btnp(⬆️)) _cursor.y-=1
 	if (btnp(⬇️)) _cursor.y+=1
 	if (btnp(⬅️)) _cursor.x-=1
@@ -889,6 +904,10 @@ function updatewritedeck()
 	end
 	local lx=_cursor.x
 	local ly=_cursor.y
+	if btnp(❎,1) then
+		invertdeck("w")
+		sfx(0)
+	end
 	if (btnp(⬆️)) _cursor.y-=1
 	if (btnp(⬇️)) _cursor.y+=1
 	if (btnp(⬅️)) _cursor.x-=1
