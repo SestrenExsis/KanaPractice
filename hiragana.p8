@@ -1086,9 +1086,24 @@ function drawread()
 		cursor(1,96,1)
 		print("say the kana out loud")
 	elseif _state=="check" then
-		cursor(1,84,1)
-		print("the answer was "..k.name)
+		local top=84
+		local msg="the answer was "..k.name
+		if (#k.name<3) msg=msg.." "
+		if (#k.name<2) msg=msg.." "
+		cursor(1,top,1)
+		print(msg)
 		print("did you get it right?")
+		-- draw kana name large
+		for y=0,4 do
+			for x=0,11 do
+				local sx=4*(#msg-3)+x
+				local sy=top+y
+				local tx=1+4*x
+				local ty=1+4*y
+				local c=pget(sx,sy)
+				rectfill(tx,ty,tx+3,ty+3,c)
+			end
+		end
 	elseif _state=="stats" then
 		cursor(1,90,1)
 		local correct=_guesses-_errors
