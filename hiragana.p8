@@ -653,6 +653,7 @@ function initmenu()
 	drawfn=drawmenu
 	menuitem(1)
 	menuitem(2)
+	menuitem(3)
 	_menuindex=1
 	_menu={
 		"study read deck ",
@@ -769,6 +770,8 @@ function initreaddeck()
 	updatefn=updatereaddeck
 	drawfn=drawreaddeck
 	menuitem(1,"invert deck",invertreaddeck)
+	menuitem(2)
+	menuitem(3)
 	_cursor=point(0,0)
 	_cols=11
 	_rows=5
@@ -895,6 +898,8 @@ function initwritedeck()
 	updatefn=updatewritedeck
 	drawfn=drawwritedeck
 	menuitem(1,"invert deck",invertwritedeck)
+	menuitem(2)
+	menuitem(3)
 	_cursor=point(0,0)
 	_cols=11
 	_rows=5
@@ -1325,7 +1330,7 @@ function togglelogo()
 	if _showlogo then
 		msg="hide logo"
 	end
-	menuitem(1,msg,togglelogo)
+	menuitem(2,msg,togglelogo)
 end
 
 function togglemsgs()
@@ -1334,7 +1339,7 @@ function togglemsgs()
 	if _showmsgs then
 		msg="hide messages"
 	end
-	menuitem(2,msg,togglemsgs)
+	menuitem(3,msg,togglemsgs)
 end
 
 function initsandbox()
@@ -1344,8 +1349,9 @@ function initsandbox()
 	drawfn=drawsandbox
 	_showlogo=false
 	_showmsgs=true
-	menuitem(1,"show title",togglelogo)
-	menuitem(2,"hide messages",togglemsgs)
+	menuitem(1,"exit to menu",initmenu)
+	menuitem(2,"show title",togglelogo)
+	menuitem(3,"hide messages",togglemsgs)
 	palt(0,false)
 	palt(7,true)
 	_lmsg="🅾️ undo"
