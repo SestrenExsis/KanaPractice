@@ -652,6 +652,7 @@ function initmenu()
 	updatefn=updatemenu
 	drawfn=drawmenu
 	menuitem(1)
+	menuitem(2)
 	_menuindex=1
 	_menu={
 		"study read deck ",
@@ -1318,13 +1319,37 @@ end
 -- * check : show stroke order
 -- * stats : show stats
 
+function togglelogo()
+	_showlogo=not _showlogo
+	local msg="show logo"
+	if _showlogo then
+		msg="hide logo"
+	end
+	menuitem(1,msg,togglelogo)
+end
+
+function togglemsgs()
+	_showmsgs=not _showmsgs
+	local msg="show messages"
+	if _showmsgs then
+		msg="hide messages"
+	end
+	menuitem(2,msg,togglemsgs)
+end
+
 function initsandbox()
 	_maxr=2.000
 	initfn=nextsandbox
 	updatefn=updatesandbox
 	drawfn=drawsandbox
+	_showlogo=false
+	_showmsgs=true
+	menuitem(1,"show title",togglelogo)
+	menuitem(2,"hide messages",togglemsgs)
 	palt(0,false)
 	palt(7,true)
+	_lmsg="🅾️ undo"
+	_rmsg="draw ❎"
 	nextsandbox()
 end
 
@@ -1407,7 +1432,8 @@ function drawsandbox()
 	)
 	pal(1,3)
 	pal(2,11)
-	spr(196,32,16,8,3)
+	if (_showlogo) spr(196,32,16,8,3)
+	if (_showmsgs) drawmsgs()
 end
 __gfx__
 000100000007000000010000000100000000000000000000007eee0000111100007e000000110000001100000011000000010010000700100001001000010070
