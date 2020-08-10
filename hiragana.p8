@@ -619,6 +619,13 @@ end
 function drawtitle()
 	cls()
 	pal()
+	local scl=8
+	local lft=128-(20*t())%212
+	local top=40
+	local k=_kanatbl["a"]
+	local i=(12*t())%128
+	i=mid(0,i-16,64)
+	drawkana(k,lft+2,top+2,scl,_c_dry,i)
 	local p=2*min(0.5,t())
 	local y=-20+20*p
 	rectfill(0,y+0,127,y+8,7)
@@ -640,7 +647,8 @@ function drawtitle()
 	drawmsgs(p)
 	pal(1,3)
 	pal(2,7)
-	spr(196,32,38,8,3)
+	spr(196,32,20,8,3)
+	--print(stat(0).." "..stat(1),16,122)
 	print("v".._version,1,122-y)
 end
 
