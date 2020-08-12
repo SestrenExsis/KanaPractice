@@ -481,14 +481,15 @@ end
 
 -- helper functions
 
-function drawmsgs(p)
+function drawmsgs(p,c)
 	if (p==nil) p=1.0
+	if (c==nil) c=3
 	if _lmsg!=nil and #_lmsg>0 then
-		print(_lmsg,3,137-15*p,1)
+		print(_lmsg,3,137-15*p,c)
 	end
 	if _rmsg!=nil and #_rmsg>0 then
 		local x=128-4*#_rmsg-4
-		print(_rmsg,x,137-15*p,1)
+		print(_rmsg,x,137-15*p,c)
 	end
 end
 
@@ -633,28 +634,28 @@ function drawtitle()
 	drawkana(_kana,lft+2,top+2,scl,_c_dry,i)
 	local p=2*min(0.5,t())
 	local y=-20+20*p
-	--rectfill(0,y+0,127,y+8,0)
-	--rectfill(0,y+10,127,y+13,1)
-	--rectfill(0,y+15,127,y+16,13)
+	rectfill(0,y+0,127,y+8,0)
+	rectfill(0,y+10,127,y+13,3)
+	rectfill(0,y+15,127,y+16,11)
 	--rectfill(0,y+18,127,y+18,12)
 	--rectfill(0,127-y-18,127,127-y-18,12)
-	--rectfill(0,127-y-15,127,127-y-16,13)
-	--rectfill(0,127-y-10,127,127-y-13,1)
-	--rectfill(0,127-y-0,127,127-y-8,0)
+	rectfill(0,127-y-15,127,127-y-16,11)
+	rectfill(0,127-y-10,127,127-y-13,3)
+	rectfill(0,127-y-0,127,127-y-8,0)
 	color(1)
 	if _logtm==0 then
-		print("ready to learn hiragana?",1,2+y)
+		print("ready to learn hiragana?",1,2+y,3)
 	else
 		local curtm=entime()
 		local tm=detime(curtm-_logtm)
-		print("last studied "..tm.." ago",1,2+y)
+		print("last studied "..tm.." ago",1,2+y,3)
 	end
-	drawmsgs(p)
 	pal(1,3)
 	pal(2,11)
+	drawmsgs(p)
 	spr(196,32,20,8,3)
 	--print(stat(0).." "..stat(1),16,122)
-	print("v".._version,1,122-y)
+	print("v".._version,1,122-y,3)
 end
 
 -- menu screen
