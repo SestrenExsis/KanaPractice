@@ -676,6 +676,13 @@ function initmenu()
 		"practice writing",
 		"sandbox         "
 	}
+	_tips={
+		{"choose which kana to show","when doing a reading practice"},
+		{"choose which kana to show","when doing a writing practice"},
+		{"start a reading practice"},
+		{"start a writing practice"},
+		{"free draw on a blank canvas"}
+	}
 	_lmsg="⬆️⬇️ choose"
 	_rmsg="open ❎"
 end
@@ -698,6 +705,9 @@ end
 
 function drawmenu()
 	cls()
+	for i,text in ipairs(_tips[_menuindex]) do
+		print(text,1,i*6,3)
+	end
 	for i,text in ipairs(_menu) do
 		local bc=7
 		local fc=3
