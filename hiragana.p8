@@ -18,7 +18,7 @@ __lua__
 -- * choose a random kana
 -- * ask the player to draw it
 
-_version="1.0.0"
+_version=1
 cartdata("sestrenexsis_hiragana_1")
 
 -- the demem() and enmem() 
@@ -451,11 +451,12 @@ function _init()
 	if dget(63)==0 then
 		-- if this is first load
 		-- add a,e,i,o,u to decks
-		dset(0,0x4000.4000)
-		dset(1,0x4000.4000)
-		dset(2,0x4000.4000)
-		dset(3,0x4000.4000)
-		dset(4,0x4000.4000)
+		for i=1,5 do
+			local k=_kanatbl[_kanakey[i]]
+			k.read=true
+			k.write=true
+			dset(k.index,enmem(k))
+		end
 	end
 	-- store previous study time
 	_logtm=dget(62)
