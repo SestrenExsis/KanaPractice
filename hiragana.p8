@@ -672,15 +672,15 @@ function initmenu()
 	_menuindex=1
 	_menu={
 		"edit read deck  ",
-		"edit write deck ",
 		"practice reading",
+		"edit write deck ",
 		"practice writing",
 		"sandbox         "
 	}
 	_tips={
 		{"choose which kana to show","when doing a reading practice"},
-		{"choose which kana to show","when doing a writing practice"},
 		{"start a reading practice"},
+		{"choose which kana to show","when doing a writing practice"},
 		{"start a writing practice"},
 		{"free draw on a blank canvas"}
 	}
@@ -697,8 +697,8 @@ function updatemenu()
 	if btnp(❎) then
 		sfx(61)
 		if (_menuindex==1) initreaddeck()
-		if (_menuindex==2) initwritedeck()
-		if (_menuindex==3) initread()
+		if (_menuindex==2) initread()
+		if (_menuindex==3) initwritedeck()
 		if (_menuindex==4) initwrite()
 		if (_menuindex==5) initsandbox()
 	end
