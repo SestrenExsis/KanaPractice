@@ -787,6 +787,37 @@ function drawcard(
 	end
 end
 
+function drawhistory(
+	k, -- kana    : table
+	m  -- mode    : str
+	)
+	print("recent attempts",64,2,7)
+	if k!="" then
+		local wt=0
+		local hs=nil
+		if m=="r" then
+			hs=k.reads
+			--wt=sum(k.reads)
+		else
+			hs=k.writes
+			--wt=sum(k.writes)
+		end
+		for i=1,10 do
+			local lft=70+4*i
+			if #hs>=i then
+				if hs[i]==1 then
+					rect(lft,10,lft+2,12,3)
+				else
+					line(lft,10,lft+2,12,8)
+					line(lft+2,10,lft,12,8)
+				end
+			else
+				pset(lft+1,11,2)
+			end
+		end
+	end
+end
+
 -- study read deck screen
 
 function initreaddeck()
@@ -902,16 +933,17 @@ function drawreaddeck()
 		lft=rgt+4
 		top=top+2
 		print(_sk.name,lft,top,6)
-		local m=dget(_sk.index)
-		print(tostr(m,true),lft,top+8,6)
-		local mt=demem(m)
-		local act="-"
-		if (mt.r) act="+"
-		print(act.."r",lft,top+16,12)
-		for i=1,#mt.rh do
-			print(mt.rh[i],lft+4+4*i,top+16,6)
-		end
+		--local m=dget(_sk.index)
+		--print(tostr(m,true),lft,top+8,6)
+		--local mt=demem(m)
+		--local act="-"
+		--if (mt.r) act="+"
+		--print(act.."r",lft,top+16,12)
+		--for i=1,#mt.rh do
+		--	print(mt.rh[i],lft+4+4*i,top+16,6)
+		--end
 	end
+	drawhistory(_sk,"r")
 	drawmsgs()
 end
 
@@ -1009,16 +1041,17 @@ function drawwritedeck()
 		lft=rgt+4
 		top=top+2
 		print(_sk.name,lft,top,6)
-		local m=dget(_sk.index)
-		print(tostr(m,true),lft,top+8,6)
-		local mt=demem(m)
-		local act="-"
-		if (mt.w) act="+"
-		print(act.."w",lft,top+16,12)
-		for i=1,#mt.wh do
-			print(mt.wh[i],lft+4+4*i,top+16,6)
-		end
+		--local m=dget(_sk.index)
+		--print(tostr(m,true),lft,top+8,6)
+		--local mt=demem(m)
+		--local act="-"
+		--if (mt.w) act="+"
+		--print(act.."w",lft,top+16,12)
+		--for i=1,#mt.wh do
+		--	print(mt.wh[i],lft+4+4*i,top+16,6)
+		--end
 	end
+	drawhistory(_sk,"w")
 	drawmsgs()
 end
 -->8
