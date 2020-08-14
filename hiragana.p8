@@ -787,21 +787,44 @@ function drawcard(
 	end
 end
 
+function drawpill(
+	x,y, -- position : number
+	f,   -- fill     : number
+	m,   -- max      : number
+	c    -- color    : number
+	)
+	local rgt=x+4*m
+	line(x+1,y,rgt-1,y,c)
+	line(x,y+1,x,y+3,c)
+	line(x+1,y+4,rgt-1,y+4,c)
+	line(rgt,y+1,rgt,y+3,c)
+	for i=2,m do
+		pset(x+4*(i-1),y+1,c)
+		pset(x+4*(i-1),y+3,c)
+	end
+	for i=1,f do
+		local lft=x+1+4*(i-1)
+		local top=y+1
+		rectfill(lft,top,lft+2,top+2,c)
+	end
+end
+
 function drawhistory(
 	k, -- kana    : table
 	m  -- mode    : str
 	)
 	print("recent attempts",64,2,7)
-	if k!="" then
+	if k!="" and k!=nil then
 		local wt=0
 		local hs=nil
 		if m=="r" then
 			hs=k.reads
-			--wt=sum(k.reads)
+			wt=sum(k.reads)
 		else
 			hs=k.writes
-			--wt=sum(k.writes)
+			wt=sum(k.writes)
 		end
+		drawpill(65,18,wt,10,2)
 		for i=1,10 do
 			local lft=70+4*i
 			if #hs>=i then
