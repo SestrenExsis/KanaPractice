@@ -818,7 +818,21 @@ function drawhistory(
 			hs=k.writes
 			wt=sum(k.writes)
 		end
-		drawpill(65,18,wt,10,2)
+		-- draw progress pills
+		local fl={1,0,0,0,0,0}
+		if (#hs>0) fl[2]=1
+		if (wt>=1) fl[3]=min(2,wt)
+		if (wt>=3) fl[4]=min(3,wt-2)
+		if (wt>=6) fl[5]=min(4,wt-5)
+		if (wt>=10) fl[6]=1
+		local lft=65
+		drawpill(lft+0,18,fl[1],1,2)
+		drawpill(lft+6,18,fl[2],1,14)
+		drawpill(lft+12,18,fl[3],2,9)
+		drawpill(lft+22,18,fl[4],3,10)
+		drawpill(lft+36,18,fl[5],4,11)
+		drawpill(lft+54,18,fl[6],1,12)
+		-- draw history checkmarks
 		for i=1,10 do
 			local lft=70+4*i
 			if #hs>=i then
