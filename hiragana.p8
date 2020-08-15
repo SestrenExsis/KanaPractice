@@ -6,17 +6,11 @@ __lua__
 -- github.com/sestrenexsis/kanapractice
 
 -- code based on shodo
---  by ryosuke mihara
---  github.com/oinariman/shodo
+-- * by ryosuke mihara
+-- * github.com/oinariman/shodo
+
 -- pixel art based on art by hiro (hamstone)
---  assetstore.unity.com/packages/2d/fonts/sprite-font-japanese-kana-43862
-
--- description:
--- * ink drying
-
--- quiz mode:
--- * choose a random kana
--- * ask the player to draw it
+-- * assetstore.unity.com/packages/2d/fonts/sprite-font-japanese-kana-43862
 
 _version=1
 cartdata("sestrenexsis_hiragana_1")
